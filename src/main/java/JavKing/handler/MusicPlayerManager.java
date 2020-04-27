@@ -277,7 +277,7 @@ public class MusicPlayerManager {
                         }
                         queue.offer(music);
                         if (count++ == 0) {
-                            Object toSend = playSendYTSCMessage(queue.get(0), author,
+                            Object toSend = playSendYTSCMessage(queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
                                     (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD")));
                             if (toSend instanceof EmbedBuilder) {
                                 message.getTextChannel().sendMessage(((EmbedBuilder) toSend).build()).queue();
