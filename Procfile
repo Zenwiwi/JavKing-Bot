@@ -1,1 +1,1 @@
-worker: java -cp target/classes:target/dependency/* JavKing.main.BotContainer
+worker: java -cp target/classes:target/dependency/* BotContainer
