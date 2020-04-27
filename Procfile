@@ -1,0 +1,1 @@
+worker: java -jar JavKing_STABLE-1.0-all.jar
