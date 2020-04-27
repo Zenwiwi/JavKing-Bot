@@ -1,1 +1,1 @@
-worker: java -jar JavKing.main-1.0-SNAPSHOT-jar-with-dependencies.jar~
+worker: java -jar JavKing.main-1.0-SNAPSHOT-jar-with-dependencies.jar
