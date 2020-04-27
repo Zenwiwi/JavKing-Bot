@@ -30,6 +30,11 @@
             <version>1.4.9</version>
         </dependency>
         <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.7.02</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.13.1</version>
@@ -88,6 +93,16 @@
                     <appName>javking</appName>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                  <archive>
+                    <manifest>
+                      <mainClass>JavKing.main.BotContainer</mainClass>
+                    </manifest>
+                  </archive>
+                </configuration>
+          </plugin>
         </plugins>
     </build>
 </project>
