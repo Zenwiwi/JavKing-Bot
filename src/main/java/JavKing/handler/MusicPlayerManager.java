@@ -177,7 +177,10 @@ public class MusicPlayerManager {
     }
 
     public boolean leave() {
-        if (!queue.isEmpty()) queue.clear();
+        if (!queue.isEmpty()){
+            for (OMusic music : queue) totTimeSeconds -= music.duration;
+            queue.clear();
+        }
         if (isConnected()) stopMusic();
 
         Guild guild = bot.getJDA().getGuildById(guildId);
