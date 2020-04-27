@@ -78,4 +78,20 @@
             <url>https://jcenter.bintray.com</url>
         </repository>
     </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.heroku.sdk</groupId>
+                <artifactId>heroku-maven-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <appName>javking</appName>
+                    <processTypes>
+                        <web>java -cp target/classes:target/dependency/* BotContainer</web>
+                    </processTypes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -2,15 +2,12 @@ package JavKing.handler;
 
 import JavKing.command.meta.AbstractCommand;
 import JavKing.main.DiscordBot;
-import JavKing.templates.Templates;
 import JavKing.util.DisUtil;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 

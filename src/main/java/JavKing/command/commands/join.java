@@ -10,9 +10,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
-import java.util.Collection;
-import java.util.Objects;
-
 public class join extends AbstractCommand {
     @Override
     public String getDescription() {
