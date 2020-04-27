@@ -1,1 +1,1 @@
-worker: java -cp target/classes:target/dependency/* BotContainer
+worker: java -jar JavKing.main-1.0-SNAPSHOT-jar-with-dependencies.jar~
