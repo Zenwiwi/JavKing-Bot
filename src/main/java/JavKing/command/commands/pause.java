@@ -40,7 +40,7 @@ public class pause extends AbstractCommand {
             return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
         }
         boolean togglePause = playerManager.isPaused() ? playerManager.isPaused() : playerManager.togglePause();
-        return !togglePause
+        return togglePause
                 ? Templates.music.paused_queue.formatFull("**Paused**")
                 : Templates.command.x_mark.formatFull("**The player is already paused**");
     }
