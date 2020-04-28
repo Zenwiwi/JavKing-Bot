@@ -39,9 +39,9 @@ public class resume extends AbstractCommand {
         if (!playerManager.authorInVoice(inputMessage.getGuild(), author)) {
             return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
         }
-        boolean togglePause = !playerManager.isPaused() ? playerManager.isPaused() : playerManager.togglePause();
-        return !togglePause
-                ? Templates.music.resumed_queue.formatFull("**Resuming**")
-                : Templates.command.x_mark.formatFull("**The player is not paused**");
+        if (playerManager.isPaused()) {
+            playerManager.togglePause();
+            return Templates.music.resumed_queue.formatFull("**Resuming**");
+        } else return Templates.command.x_mark.formatFull("**The player is not paused**");
     }
 }
