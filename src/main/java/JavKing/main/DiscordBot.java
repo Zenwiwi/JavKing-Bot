@@ -67,7 +67,7 @@ public class DiscordBot {
         if (author == null || author.isBot() || channel.getType() != ChannelType.TEXT) {
             return;
         }
-        if (CommandHandler.isCommand(channel, message.getContentRaw().trim())) {
+        if (CommandHandler.isCommand(channel, message.getContentRaw().trim(), message.getContentRaw().split("\\s+"))) {
             CommandHandler.process(this, channel, author, message);
         }
     }
