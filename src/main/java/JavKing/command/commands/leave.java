@@ -25,7 +25,7 @@ public class leave extends AbstractCommand {
 
     @Override
     public String[] getAlias() {
-        return new String[0];
+        return new String[]{"dismiss"};
     }
 
     @Override

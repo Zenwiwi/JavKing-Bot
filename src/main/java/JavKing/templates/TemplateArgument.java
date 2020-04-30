@@ -12,6 +12,7 @@ public enum TemplateArgument {
     X("x", "X", e -> "❌"),
     O("o", "O", e -> "⭕"),
     BOOM("boom", "Boom", e -> "\uD83D\uDCA5"),
+    MAG("mag", "Mag", e -> "\uD83D\uDD0D"),
 
     TRIUMPH("triumph", "Triumph", e -> "\uD83D\uDE24"),
 

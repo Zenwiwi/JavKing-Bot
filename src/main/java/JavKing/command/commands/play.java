@@ -118,15 +118,15 @@ public class play extends AbstractCommand {
                         playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_EMBED_LINKS))) {
                     return Templates.command.triumph.formatFull("**No permission to send message in `" + channel.getName() + "`**");
                 }
-                    try {
-                        if (playerManager.isConnected()) {
-                            playerManager.leave();
-                        }
-                        playerManager.connectTo(vc);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
+                try {
+                    if (playerManager.isConnected()) {
+                        playerManager.leave();
                     }
+                    playerManager.connectTo(vc);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
+                }
                 playerManager.startPlaying();
             }
         }

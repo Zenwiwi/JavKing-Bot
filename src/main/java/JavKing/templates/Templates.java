@@ -18,5 +18,6 @@ public final class Templates {
         public static final Template o_mark = new Template(TemplateArgument.O, TemplateArgument.ARGS);
         public static final Template boom = new Template(TemplateArgument.BOOM, TemplateArgument.ARGS);
         public static final Template triumph = new Template(TemplateArgument.TRIUMPH, TemplateArgument.ARGS);
+        public static final Template mag = new Template(TemplateArgument.MAG, TemplateArgument.ARGS);
     }
 }
