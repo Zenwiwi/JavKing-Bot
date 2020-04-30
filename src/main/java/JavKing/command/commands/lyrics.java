@@ -50,7 +50,7 @@ public class lyrics extends AbstractCommand {
 
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
-        if (args.length > 0 && Pattern.compile("https?://").matcher(args[0]).find()) {
+        if (args.length > 0 && !Pattern.compile("https?://").matcher(args[0]).find()) {
             channel.sendMessage(Templates.command.mag.formatFull("**Searching lyrics for** `" + String.join(" ", args) + "`")).queue();
             try {
                 HttpResponse<String> response = Unirest.get("https://genius.p.rapidapi.com/search?q=" + String.join("%20", args))
