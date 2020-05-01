@@ -71,8 +71,8 @@ public class lyrics extends AbstractCommand {
                 String artist = heading2.asText().trim();
 
 //                HtmlImage thumbnail = (HtmlImage) thumbnailList.get(0).getByXPath(".//img").get(0);
-                String lyrics = paragraph.asText().replaceAll("\\n+", "\n");
-                Matcher matcher = Pattern.compile("[\\[].*?[]]", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(lyrics);
+                String lyrics = paragraph.asText();
+                Matcher matcher = Pattern.compile("[\\[].*?[]]\\W *", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(lyrics);
                 while (matcher.find()) {
                     lyrics = matcher.replaceAll("");
                 }
