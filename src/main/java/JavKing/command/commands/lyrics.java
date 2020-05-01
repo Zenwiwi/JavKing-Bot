@@ -4,16 +4,11 @@ import JavKing.command.meta.AbstractCommand;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
-import JavKing.templates.ErrorTemplate;
 import JavKing.templates.Templates;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
-import com.jagrosh.jlyrics.Lyrics;
-import com.jagrosh.jlyrics.LyricsClient;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import jdk.nashorn.internal.parser.JSONParser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -21,9 +16,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.json.JSONObject;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,11 +71,12 @@ public class lyrics extends AbstractCommand {
                 String artist = heading2.asText().trim();
 
 //                HtmlImage thumbnail = (HtmlImage) thumbnailList.get(0).getByXPath(".//img").get(0);
-                String lyrics = paragraph.asText().replaceAll("\\n+", "");
-                Matcher matcher = Pattern.compile("[\\[].*?[]]\\W *", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(lyrics);
+                String lyrics = paragraph.asText().replaceAll("\\n+", "\n");
+                Matcher matcher = Pattern.compile("[\\[].*?[]]", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(lyrics);
                 while (matcher.find()) {
                     lyrics = matcher.replaceAll("");
                 }
+                client.close();
                 EmbedBuilder embedBuilder = new EmbedTemplate()
                         .clearEmbed()
                         .setTitle(title + " - " + artist)

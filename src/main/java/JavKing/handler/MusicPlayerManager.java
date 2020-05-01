@@ -356,7 +356,7 @@ public class MusicPlayerManager {
     }
 
     public void trackStarted() {
-
+        new LeaveTimer().stopTimer();
     }
 
     public String skipTrack(@Nullable String toIndex) {
@@ -374,6 +374,33 @@ public class MusicPlayerManager {
             totTimeSeconds -= duration;
             scheduler.skipTrack();
             return Templates.music.skipped_song.formatFull("***Skipped to*** `" + getLinkedQueue().get(0).title + "`");
+        }
+    }
+
+    public static class LeaveTimer {
+        static int interval;
+        static Timer timer;
+
+        public void startTimer() {
+            timer = new Timer();
+            interval = 240000;
+            timer.scheduleAtFixedRate(new TimerTask() {
+
+                public void run() {
+                    countdownTimer();
+                }
+            }, 1000, 1000);
+        }
+
+        private static final int countdownTimer() {
+            if (interval == 1) {
+                timer.cancel();
+            }
+            return --interval;
+        }
+
+        public void stopTimer() {
+            timer.cancel();
         }
     }
 
@@ -425,6 +452,8 @@ public class MusicPlayerManager {
             AudioTrack poll = queue.poll();
             if (poll != null) {
                 player.startTrack(poll, false);
+            } else {
+                new LeaveTimer().startTimer();
             }
         }
 

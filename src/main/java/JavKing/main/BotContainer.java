@@ -20,7 +20,7 @@ public class BotContainer {
     public static final Logger LOGGER = LogManager.getLogger(DiscordBot.class);
     public static MongoDbAdapter mongoDbAdapter = null;
     public static YTUtil ytUtil = null;
-    // public static Dotenv dotenv = Dotenv.configure().load();
+    public static Dotenv dotenv = Dotenv.configure().ignoreIfMalformed().ignoreIfMissing().load();
     private final DiscordBot[] shards;
     private final int numShards;
     private final AtomicInteger numGuilds;
@@ -49,8 +49,7 @@ public class BotContainer {
     }
 
     public static String getDotenv(String env) {
-        // return dotenv.get(env);
-       return System.getenv(env);
+        return System.getenv(env) == null ? dotenv.get(env) : System.getenv(env);
     }
 
     public int getRecommendedShards() {

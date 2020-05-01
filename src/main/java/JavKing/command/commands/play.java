@@ -127,10 +127,9 @@ public class play extends AbstractCommand {
                     e.printStackTrace();
                     return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
                 }
-                playerManager.startPlaying();
             }
+            playerManager.startPlaying();
         }
-
         if (toSend != null) {
             if (toSend instanceof EmbedBuilder) {
                 channel.sendMessage(((EmbedBuilder) toSend).build()).queue();
