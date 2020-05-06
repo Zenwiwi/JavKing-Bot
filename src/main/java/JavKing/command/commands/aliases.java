@@ -4,7 +4,6 @@ import JavKing.command.meta.AbstractCommand;
 import JavKing.handler.CommandHandler;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
-import JavKing.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;

@@ -46,7 +46,7 @@ public class join extends AbstractCommand {
             if (!playerManager.checkDiscordBotVCPerms(vc, Permission.VOICE_SPEAK)) {
                 return Templates.command.triumph.formatFull("**No permission to speak in `" + vc.getName() + "`**");
             }
-            if (!(playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_WRITE))) {
+            if (!playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_WRITE)) {
                 return Templates.command.triumph.formatFull("**No permission to send message in `" + channel.getName() + "`**");
             }
             try {

@@ -17,7 +17,6 @@ import org.json.JSONObject;
 
 import java.awt.*;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class lyrics extends AbstractCommand {
@@ -69,26 +68,22 @@ public class lyrics extends AbstractCommand {
                 String title = heading1.asText().trim();
                 HtmlHeading2 heading2 = (HtmlHeading2) aboutList.get(0).getByXPath(".//h2").get(0);
                 String artist = heading2.asText().trim();
-
 //                HtmlImage thumbnail = (HtmlImage) thumbnailList.get(0).getByXPath(".//img").get(0);
-                String lyrics = paragraph.asText();
-                Matcher matcher = Pattern.compile("[\\[].*?[]]\\W *", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(lyrics);
-                while (matcher.find()) {
-                    lyrics = matcher.replaceAll("");
-                }
+
+                String lyrics = paragraph.asText().replaceAll("[\\[].*?[]]\\s*", "");
                 client.close();
+
                 EmbedBuilder embedBuilder = new EmbedTemplate()
                         .clearEmbed()
                         .setTitle(title + " - " + artist)
                         .setThumbnail(thumbnail)
                         .setFooter("Requested by " + author.getName(), author.getEffectiveAvatarUrl());
-                int finalCount = 2048 - 3 - title.length() - artist.length();
-                if (lyrics != null && lyrics.length() > finalCount) {
-                    for (int i = 0; i < lyrics.length(); i += finalCount) {
+                if (lyrics.length() > 2048) {
+                    for (int i = 0; i < lyrics.length(); i += 2048) {
                         if (i > 0) {
                             embedBuilder.clear().setColor(Color.decode(BotContainer.getDotenv("HEX")));
                         }
-                        embedBuilder.setDescription(lyrics.substring(i, Math.min(i + finalCount, lyrics.length())))
+                        embedBuilder.setDescription(lyrics.substring(i, Math.min(i + 2048, lyrics.length())))
                                 .setFooter("Requested by " + author.getName(), author.getEffectiveAvatarUrl());
                         channel.sendMessage(embedBuilder.build()).queue();
                     }

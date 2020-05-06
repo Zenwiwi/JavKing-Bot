@@ -2,17 +2,14 @@ package JavKing.command.commands;
 
 import JavKing.command.meta.AbstractCommand;
 import JavKing.command.model.OMusic;
+import JavKing.handler.CommandHandler;
 import JavKing.handler.MusicPlayerManager;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.ErrorTemplate;
 import JavKing.templates.Templates;
-import JavKing.util.LPUtil;
-import JavKing.util.SCUtil;
-import JavKing.util.YTSearch;
-import JavKing.util.YTUtil;
+import JavKing.util.*;
 import com.google.common.base.Joiner;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 
@@ -61,20 +58,12 @@ public class play extends AbstractCommand {
             return Templates.command.x_mark.formatFull("**You must be in a voice channel first!**");
         }
 
-        channel.sendMessage("<:YT:605943277706936324> **Searching for **\uD83D\uDD0E `" + Joiner.on(" ").join(args) + "`").queue();
         Object toSend = null;
 
         if (args.length > 0) {
+            channel.sendMessage("<:YT:605943277706936324> **Searching for **\uD83D\uDD0E `" + Joiner.on(" ").join(args) + "`").queue();
+
             if (YTUtil.isPlaylistCode(args[0])) {
-//                List<YTSearch.SimpleResult> playlist = ytSearch.searchPlaylist(args[0], inputMessage.getGuild().getId());
-//                int count = 0;
-//                for (YTSearch.SimpleResult track : playlist) {
-//                    OMusic music = ytSearch.resolveVideoParameters(BotConfig.YTVID + track.getCode(), author);
-//                    processTrack(music, player);
-//                    if (count++ == 0) {
-//                        toSend = player.playSendYTSCMessage(music, author, BotConfig.YOUTUBE);
-//                    }
-//                }
                 playerManager.playlistAdd(args[0], author, inputMessage);
             } else if (SCUtil.SCisURI(args[0])) {
                 try {
@@ -129,14 +118,10 @@ public class play extends AbstractCommand {
                 }
             }
             playerManager.startPlaying();
-        }
-        if (toSend != null) {
-            if (toSend instanceof EmbedBuilder) {
-                channel.sendMessage(((EmbedBuilder) toSend).build()).queue();
-            } else {
-                channel.sendMessage(toSend.toString()).queue();
-            }
-        }
+        } else
+            return ((AbstractCommand) CommandHandler.getCommands().get("help")).execute(bot, new String[]{getCommand()}, channel, author, inputMessage);
+
+        if (toSend != null) Util.sendMessage(toSend, inputMessage);
         return null;
     }
 }

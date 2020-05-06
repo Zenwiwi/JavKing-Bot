@@ -3,16 +3,19 @@ package JavKing.main;
 import JavKing.handler.CommandHandler;
 import JavKing.handler.discord.JDAEventManager;
 import JavKing.handler.discord.JDAEvents;
-import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.security.auth.login.LoginException;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static net.dv8tion.jda.api.requests.GatewayIntent.*;
 
 public class DiscordBot {
     public static final Logger LOGGER = LogManager.getLogger(DiscordBot.class);
@@ -31,7 +34,7 @@ public class DiscordBot {
             try {
                 restartJDA();
                 break;
-            } catch (LoginException e) {
+            } catch (LoginException | InterruptedException e) {
                 try {
                     Thread.sleep(5_00L);
                 } catch (InterruptedException ex) {
@@ -41,13 +44,14 @@ public class DiscordBot {
         }
     }
 
-    public void restartJDA() throws LoginException {
-        jda.set(new JDABuilder(AccountType.BOT)
-                .setToken(BotContainer.getDotenv("TOKEN"))
+    public void restartJDA() throws LoginException, InterruptedException {
+        GatewayIntent[] intents = new GatewayIntent[]{GUILD_MESSAGES, GUILD_VOICE_STATES, DIRECT_MESSAGES};
+        jda.set(JDABuilder.create(BotContainer.getDotenv("TOKEN"), Arrays.asList(intents))
                 .setActivity(Activity.watching("Beni"))
                 .setEventManager(new JDAEventManager(this))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
-                .build());
+                .build()
+                .awaitReady());
         jda.get().addEventListener(new JDAEvents(this));
     }
 

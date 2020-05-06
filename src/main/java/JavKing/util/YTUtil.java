@@ -24,6 +24,10 @@ public class YTUtil {
         youtube = temp;
     }
 
+    public static boolean isURI(String uri) {
+        return ytViURI.matcher(uri).find() || ytPlURI.matcher(uri).find();
+    }
+
     public static boolean isVideoCode(String uri) {
         return ytViURI.matcher(uri).find();
     }

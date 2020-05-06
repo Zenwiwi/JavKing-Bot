@@ -73,17 +73,9 @@ public class YTSearch {
     public OMusic resolveVideoParameters(String uri, @Nullable User author) {
         String id = YTUtil.getVideoCode(uri);
         Document doc = (Document) BotContainer.mongoDbAdapter.getCollection("videoId").find(Filters.eq("id", id)).first();
-        OMusic music = new OMusic();
-        if (doc != null && doc.get("id").equals(id)) {
-            music.id = id;
-            music.title = doc.getString("title");
-            if (author != null) {
-                music.requestedBy = author.getAsTag();
-            }
-            music.uri = doc.getString("uri");
-            music.author = doc.getString("channel");
-            music.duration = doc.getLong("duration");
-            music.thumbnail = doc.getString("thumbnail");
+        OMusic music;
+        if (doc != null) {
+            music = Util.fillOMusic(doc, author);
         } else {
             music = searchVideo(id, author);
             BotContainer.mongoDbAdapter.getCollection("videoId").insertOne(new Document("id", music.id).append("thumbnail", music.thumbnail)

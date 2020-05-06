@@ -5,10 +5,13 @@ import JavKing.main.BotContainer;
 import JavKing.templates.ErrorTemplate;
 import com.mongodb.client.model.Filters;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.*;
 import org.bson.Document;
 
 import java.util.Objects;
+
+import javax.annotation.Nullable;
 
 public class Util {
     public static String idOrURI(OMusic trackToAdd) {
@@ -62,5 +65,37 @@ public class Util {
             }
         }
         objects[j++] = objects[length - 1];
+    }
+
+    public static OMusic fillOMusic(Document document, @Nullable User author) {
+        OMusic music = new OMusic();
+        music.title = document.getString("title");
+        if (author != null) {
+            music.requestedBy = author.getAsTag();
+        }
+        music.author = document.getString("channel");
+        music.thumbnail = document.getString("thumbnail");
+        music.id = document.getString("id");
+        music.duration = document.getLong("duration");
+        music.uri = document.getString("uri");
+        return music;
+    }
+
+    public static void sendMessage(Object toSend, Message message) {
+        sendMessage(toSend, message.getTextChannel());
+    }
+
+    public static void sendMessage(Object toSend, MessageChannel channel) {
+        sendMessage(toSend, (TextChannel) channel);
+    }
+
+    public static void sendMessage(Object toSend, TextChannel channel) {
+        if (toSend != null) {
+            if (toSend instanceof EmbedBuilder) {
+                channel.sendMessage(((EmbedBuilder) toSend).build()).queue();
+            } else {
+                channel.sendMessage(toSend.toString()).queue();
+            }
+        }
     }
 }

@@ -269,19 +269,15 @@ public class MusicPlayerManager {
                         music.uri = track.getInfo().uri;
                         music.author = track.getInfo().author;
                         music.duration = track.getDuration();
-                        totTimeSeconds += music.duration;
                         if (count == 0) {
                             music.thumbnail = Util.resolveThumbnail(track, message);
                             LPUtil.updateLPURI(SCUtil.SCisURI(music.uri) ? uri : YTUtil.getPlaylistCode(uri),
                                     uri, playlist.getName(), music.thumbnail, message.getGuild().getId());
                         }
-                        queue.offer(music);
+                        addToQueue(music);
                         if (count++ == 0) {
-                            Object toSend = playSendYTSCMessage(queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
-                                    (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD")));
-                            if (toSend instanceof EmbedBuilder) {
-                                message.getTextChannel().sendMessage(((EmbedBuilder) toSend).build()).queue();
-                            } else message.getTextChannel().sendMessage(toSend.toString()).queue();
+                            Util.sendMessage(playSendYTSCMessage(queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
+                                    (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD"))), message);
                         }
                     }
                 } catch (Exception ignored) {
@@ -290,7 +286,7 @@ public class MusicPlayerManager {
                 if (!isInVoiceWith(message.getGuild(), author) && !getLinkedQueue().isEmpty()) {
                     VoiceChannel vc = Objects.requireNonNull(Objects.requireNonNull(message.getGuild().getMember(author)).getVoiceState()).getChannel();
                     if (vc == null) {
-                        message.getTextChannel().sendMessage(Templates.command.x_mark.formatFull("**You must be in a voice channel first!**")).queue();
+                        Util.sendMessage(Templates.command.x_mark.formatFull("**You must be in a voice channel first!**"), message);
                         return;
                     }
                     try {
@@ -299,7 +295,7 @@ public class MusicPlayerManager {
                         }
                         connectTo(vc);
                     } catch (Exception e) {
-                        message.getTextChannel().sendMessage(Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**")).queue();
+                        Util.sendMessage(Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**"), message);
                         return;
                     }
                     startPlaying();
