@@ -45,7 +45,8 @@ public class DiscordBot {
     }
 
     public void restartJDA() throws LoginException, InterruptedException {
-        GatewayIntent[] intents = new GatewayIntent[]{GUILD_MESSAGES, GUILD_VOICE_STATES, DIRECT_MESSAGES, GUILD_MEMBERS};
+        GatewayIntent[] intents = new GatewayIntent[]{GUILD_MESSAGES, GUILD_VOICE_STATES, DIRECT_MESSAGES, GUILD_MEMBERS, GUILD_PRESENCES,
+        GUILD_EMOJIS};
         jda.set(JDABuilder.create(BotContainer.getDotenv("TOKEN"), Arrays.asList(intents))
                 .setActivity(Activity.watching("Beni"))
                 .setEventManager(new JDAEventManager(this))
