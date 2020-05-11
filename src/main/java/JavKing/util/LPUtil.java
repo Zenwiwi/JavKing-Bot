@@ -13,17 +13,16 @@ import org.bson.Document;
 public class LPUtil {
 
     public static Object resolveLPURI(User author, Message message, MusicPlayerManager playerManager) {
-        Document doc = (Document) BotContainer.mongoDbAdapter.getCollection("lastPlayed").find(Filters.eq("guildId", message.getGuild().getId()))
-                .first();
-        if (doc != null && doc.getString("guildId").equals(message.getGuild().getId())) {
-            String uri = doc.getString("uri");
-            String id = doc.getString("id");
+        OMusic music = BotContainer.mongoDbAdapter.loadMusic(null, author, message.getTextChannel());
+        if (music != null) {
+            String uri = music.uri;
+            String id = music.id;
             if (SCUtil.SCisURI(uri)) {
                 new SCSearch().resolveSCURI(id, author, message, playerManager);
             } else if (YTUtil.isVideoCode(uri)) {
-                OMusic music = new YTSearch().resolveVideoParameters(uri, author);
-                play.processTrack(music, playerManager);
-                return playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("YOUTUBE"));
+                OMusic search = new YTSearch().resolveVideoParameters(uri, author);
+                play.processTrack(search, playerManager);
+                return playerManager.playSendYTSCMessage(search, author, BotContainer.getDotenv("YOUTUBE"));
             } else if (YTUtil.isPlaylistCode(uri)) {
                 playerManager.playlistAdd(uri, author, message);
                 return null;
@@ -34,15 +33,8 @@ public class LPUtil {
         return null;
     }
 
-    public static void updateLPURI(String id, String uri, String title, String thumbnail, String guildId) {
-        Document doc = (Document) BotContainer.mongoDbAdapter.getCollection("lastPlayed").find(Filters.eq("guildId", guildId))
-                .first();
-        if (doc != null && doc.getString("guildId").equals(guildId)) {
-            BotContainer.mongoDbAdapter.getCollection("lastPlayed").updateOne(Filters.eq("guildId", guildId), new Document("$set",
-                    new Document("guildId", guildId).append("uri", uri).append("id", id).append("thumbnail", thumbnail).append("title", title)));
-        } else {
-            BotContainer.mongoDbAdapter.getCollection("lastPlayed").insertOne(new Document("guildId", guildId).append("uri", uri).append("id", id)
-                    .append("thumbnail", thumbnail).append("title", title));
-        }
+    public static int updateLPURI(String id, String uri, String title, String thumbnail, String guildId) {
+        return BotContainer.mongoDbAdapter.update("lastPlayed", guildId, Util.lastPlayedKeys(),
+                new Object[]{guildId, uri, id, thumbnail, title});
     }
 }

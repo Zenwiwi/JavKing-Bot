@@ -48,7 +48,7 @@ public class DiscordBot {
         GatewayIntent[] intents = new GatewayIntent[]{GUILD_MESSAGES, GUILD_VOICE_STATES, DIRECT_MESSAGES, GUILD_MEMBERS, GUILD_PRESENCES,
         GUILD_EMOJIS};
         jda.set(JDABuilder.create(BotContainer.getDotenv("TOKEN"), Arrays.asList(intents))
-                .setActivity(Activity.watching("Beni"))
+                .setActivity(Activity.streaming("Loli Hentai", BotContainer.getDotenv("TWITCH_URI")))
                 .setEventManager(new JDAEventManager(this))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .build()

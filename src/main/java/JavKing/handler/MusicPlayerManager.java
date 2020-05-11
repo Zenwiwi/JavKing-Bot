@@ -82,6 +82,14 @@ public class MusicPlayerManager {
         }
     }
 
+    public AudioPlayer getAudioPlayer() {
+        return player;
+    }
+
+    public DefaultAudioPlayerManager getDefaultAudioPlayerManager() {
+        return playerManager;
+    }
+
     public void goToTime(Long millis) {
         player.getPlayingTrack().setPosition(millis);
     }
@@ -177,7 +185,7 @@ public class MusicPlayerManager {
     }
 
     public boolean leave() {
-        if (!queue.isEmpty()){
+        if (!queue.isEmpty()) {
             for (OMusic music : queue) totTimeSeconds -= music.duration;
             queue.clear();
         }
@@ -189,10 +197,6 @@ public class MusicPlayerManager {
     }
 
     public synchronized void stopMusic() {
-        player.destroy();
-    }
-
-    public synchronized void destroy() {
         player.destroy();
     }
 
@@ -241,14 +245,6 @@ public class MusicPlayerManager {
 
     public synchronized Object addLastPlayedToQueue(User author, Message message) throws IOException {
         return LPUtil.resolveLPURI(author, message, this);
-    }
-
-    public AudioPlayer getAudioPlayer() {
-        return player;
-    }
-
-    public DefaultAudioPlayerManager getDefaultAudioPlayerManager() {
-        return playerManager;
     }
 
     public synchronized void playlistAdd(String uri, User author, Message message) {
@@ -356,10 +352,13 @@ public class MusicPlayerManager {
     }
 
     public String skipTrack(@Nullable String toIndex) {
+        if (queue.size() == 0) {
+            return Templates.command.x_mark.formatFull("**Nothing playing in this server**");
+        }
         if (toIndex == null) {
+            totTimeSeconds -= queue.get(0).duration;
             queuePoll();
             scheduler.skipTrack();
-            totTimeSeconds -= queue.get(0).duration;
             return Templates.music.skipped_song.formatFull("***Skipped!***");
         } else {
             long duration = 0;

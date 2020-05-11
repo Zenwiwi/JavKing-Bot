@@ -63,7 +63,7 @@ public class CommandHandler {
             }
         }
 
-        String[] input = inputMessage.split("\\s+", 2);// (?:([^\s\"]+)|\"((?:\w+|\\\"|[^\"])+)")
+        String[] input = inputMessage.split("\\s+", 2);
         String[] args = input.length == 2 ? input[1].split("\\s+") : new String[0];
         input[0] = DisUtil.filterPrefix(input[0], channel).toLowerCase();
         AbstractCommand command = commands.containsKey(input[0]) ? commands.get(input[0]) : commandsAliases.get(input[0]);

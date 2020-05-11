@@ -14,12 +14,16 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 public class Util {
+    /**
+     * -based on boolean method is this true-
+     * @return True for uri (SC), False for id (YT)
+     */
     public static String idOrURI(OMusic trackToAdd) {
-        try {
-            return !SCUtil.SCisURI(trackToAdd.uri) ? trackToAdd.uri : trackToAdd.id;
-        } catch (Exception e) {
-            return ErrorTemplate.formatFull("**Error comparing URI to ID::**", e);
-        }
+        return idOrURI(trackToAdd.uri) ? trackToAdd.uri : trackToAdd.id;
+    }
+
+    public static boolean idOrURI(String uri) {
+        return !SCUtil.SCisURI(uri);
     }
 
     public static String resolveThumbnail(AudioTrack track, Message message) {
@@ -67,20 +71,6 @@ public class Util {
         objects[j++] = objects[length - 1];
     }
 
-    public static OMusic fillOMusic(Document document, @Nullable User author) {
-        OMusic music = new OMusic();
-        music.title = document.getString("title");
-        if (author != null) {
-            music.requestedBy = author.getAsTag();
-        }
-        music.author = document.getString("channel");
-        music.thumbnail = document.getString("thumbnail");
-        music.id = document.getString("id");
-        music.duration = document.getLong("duration");
-        music.uri = document.getString("uri");
-        return music;
-    }
-
     public static void sendMessage(Object toSend, Message message) {
         sendMessage(toSend, message.getTextChannel());
     }
@@ -97,5 +87,17 @@ public class Util {
                 channel.sendMessage(toSend.toString()).queue();
             }
         }
+    }
+
+    public static String[] musicKeys() {
+        return new String[]{"id", "thumbnail", "uri", "channel", "title", "duration"};
+    }
+
+    public static Object[] oMusicArray(OMusic music) {
+        return new Object[]{music.id, music.thumbnail, music.uri, music.author, music.title, music.duration};
+    }
+
+    public static String[] lastPlayedKeys() {
+        return new String[]{"guildId", "uri", "id", "thumbnail", "title"};
     }
 }
