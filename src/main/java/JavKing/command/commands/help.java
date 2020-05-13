@@ -47,7 +47,7 @@ public class help extends AbstractCommand {
                 String description = "[Command] " + command.getCommand() + "\n" +
                         (command.getAlias().length > 0 ? "[Aliases] " + String.join(", ", command.getAlias()) + "\n" : "") +
                         (command.getUsage().length > 0 ? "[Usage] " + String.join(", ", command.getUsage()) + "\n" : "") +
-                        "[Description] " + (command.getDescription() != null ? Util.capitalize(command.getDescription()) : "No desc. provided");
+                        "[Description] " + (command.getDescription() != null ? Util.capitalize(command.getDescription(),false) : "No desc. provided");
                 EmbedBuilder embedBuilder = new EmbedTemplate()
                         .setAuthor(bot.getJDA().getSelfUser().getName() + " Help", null, author.getEffectiveAvatarUrl())
                         .setDescription("```ini\n" + description + "```")

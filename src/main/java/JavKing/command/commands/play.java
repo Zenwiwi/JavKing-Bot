@@ -2,7 +2,6 @@ package JavKing.command.commands;
 
 import JavKing.command.meta.AbstractCommand;
 import JavKing.command.model.OMusic;
-import JavKing.handler.CommandHandler;
 import JavKing.handler.MusicPlayerManager;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
@@ -84,7 +83,7 @@ public class play extends AbstractCommand {
                     OMusic music = ytSearch.searchVideo(args, author);
                     if (music != null) {
                         processTrack(music, playerManager);
-                        toSend = playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("YOUTUBE"));
+                        toSend = playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("YOUTUBE"), true);
                         LPUtil.updateLPURI(music.id, music.uri, music.title, music.thumbnail, inputMessage.getGuild().getId());
                     } else {
                         return Templates.command.x_mark.formatFull("**No results found for:** `" + Joiner.on(" ").join(args) + "`");
@@ -96,22 +95,17 @@ public class play extends AbstractCommand {
             }
             if (!playerManager.isInVoiceWith(guild, author) && !playerManager.getLinkedQueue().isEmpty()) {
                 VoiceChannel vc = inputMessage.getGuild().getMember(author).getVoiceState().getChannel();
-                if (!playerManager.checkDiscordBotVCPerms(vc, Permission.VOICE_CONNECT)) {
-                    return Templates.command.triumph.formatFull("**No permission to connect to `" + vc.getName() + "`**");
-                }
-                if (!playerManager.checkDiscordBotVCPerms(vc, Permission.VOICE_SPEAK)) {
-                    return Templates.command.triumph.formatFull("**No permission to speak in `" + vc.getName() + "`**");
 
-                }
-                if (!(playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_WRITE) &&
-                        playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_EMBED_LINKS))) {
-                    return Templates.command.triumph.formatFull("**No permission to send message in `" + channel.getName() + "`**");
-                }
+                String perms = DisUtil.discordBotPermsVOICE(vc, new Permission[]{Permission.VOICE_SPEAK, Permission.VOICE_CONNECT}) +
+                        DisUtil.discordBotPermsCHANNEL(channel, new Permission[]{Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS});
+                if (!perms.equals("nullnull")) return perms;
+
                 try {
                     if (playerManager.isConnected()) {
                         playerManager.leave();
                     }
                     playerManager.connectTo(vc);
+                    BotContainer.mongoDbAdapter.update("guildSettings", (TextChannel) channel, "channelId", channel.getId());
                 } catch (Exception e) {
                     e.printStackTrace();
                     return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
@@ -119,7 +113,7 @@ public class play extends AbstractCommand {
             }
             playerManager.startPlaying();
         } else
-            return ((AbstractCommand) CommandHandler.getCommands().get("help")).execute(bot, new String[]{getCommand()}, channel, author, inputMessage);
+            return ErrorTemplate.formatFull(bot, getCommand(), channel, author, inputMessage);
 
         if (toSend != null) Util.sendMessage(toSend, inputMessage);
         return null;

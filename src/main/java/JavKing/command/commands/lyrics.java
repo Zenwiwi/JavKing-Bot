@@ -5,11 +5,13 @@ import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
 import JavKing.templates.Templates;
+import JavKing.util.DisUtil;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -42,6 +44,9 @@ public class lyrics extends AbstractCommand {
 
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
+        String perms = DisUtil.discordBotPermsCHANNEL(channel, new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_WRITE});
+        if (perms != null) return perms;
+
         if (args.length > 0 && !Pattern.compile("https?://").matcher(args[0]).find()) {
             channel.sendMessage(Templates.command.mag.formatFull("**Searching lyrics for** `" + String.join(" ", args) + "`")).queue();
             try {

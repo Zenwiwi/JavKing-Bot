@@ -2,21 +2,19 @@ package JavKing.db;
 
 import JavKing.command.model.OGuild;
 import JavKing.command.model.OMusic;
+import JavKing.guildSettings.GSetting;
+import JavKing.handler.GuildSettings;
 import JavKing.main.BotContainer;
 import JavKing.util.Util;
-import JavKing.util.YTSearch;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import org.bson.Document;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 
@@ -29,14 +27,6 @@ public class MongoDbAdapter {
 
     public MongoDatabase getDatabase() {
         return client.getDatabase("JavKing");
-    }
-
-    public OGuild getGuild(MessageChannel channel) {
-        return getGuild(((TextChannel) channel).getGuild().getIdLong());
-    }
-
-    public OGuild getGuild(long guildId) {
-        return loadRes(getCollection("guildSettings").find(Filters.eq("guildId", String.valueOf(guildId))));
     }
 
     public MongoCollection<Document> getCollection(String collection) {
@@ -86,33 +76,38 @@ public class MongoDbAdapter {
     }
 
     private int resolveParameters(String collection, @Nullable String guildId, @Nullable Document doc, String[] keys, Object[] values) {
-        if (keys.length == values.length) {
-            if (doc == null) doc = new Document();
-            ArrayList<Object> unusable = new ArrayList<>();
-            for (int i = 0; i < keys.length; i++) {
-                if (values[i].getClass().getName().startsWith("java.lang")) {
-                    doc.append(keys[i], values[i]);
-                } else unusable.add(values[i]);
-            }
-            String select, id;
-            if (guildId == null) {
-                select = Util.idOrURI(doc.getString("uri")) ? "uri" : "id";
-                id = select.equals("uri") ? doc.getString("uri") : doc.getString("id");
+        try {
+            if (keys.length == values.length) {
+                if (doc == null) doc = new Document();
+                ArrayList<Object> unusable = new ArrayList<>();
+                for (int i = 0; i < keys.length; i++) {
+                    if (values[i] != null && values[i].getClass().getName().startsWith("java.lang")) {
+                        doc.append(keys[i], values[i]);
+                    } else unusable.add(values[i]);
+                }
+                String select, id;
+                if (guildId == null) {
+                    select = Util.idOrURI(doc.getString("uri")) ? "uri" : "id";
+                    id = select.equals("uri") ? doc.getString("uri") : doc.getString("id");
+                } else {
+                    doc.append("guildId", guildId);
+                    select = "guildId";
+                    id = guildId;
+                }
+                MongoCollection<Document> dbDoc = getCollection(collection);
+                if (dbDoc.find(Filters.eq(select, id)).first() != null) {
+                    dbDoc.updateOne(Filters.eq(select, id), new Document("$set", doc));
+                } else {
+                    dbDoc.insertOne(doc);
+                }
+                BotContainer.LOGGER.info("Successfully updated music db category with " + unusable.size() + " errors");
+                return 1;
             } else {
-                doc.append("guildId", guildId);
-                select = "guildId";
-                id = guildId;
+                BotContainer.LOGGER.error("Keys array not equal to values array");
+                return -1;
             }
-            MongoCollection<Document> dbDoc = getCollection(collection);
-            if (dbDoc.find(Filters.eq(select, id)).first() != null) {
-                dbDoc.updateOne(Filters.eq(select, id), new Document("$set", doc));
-            } else {
-                dbDoc.insertOne(doc);
-            }
-            BotContainer.LOGGER.info("Successfully updated music db category with " + unusable.size() + " errors");
-            return 1;
-        } else {
-            BotContainer.LOGGER.error("Keys array not equal to values array");
+        } catch (Exception e) {
+            e.printStackTrace();
             return -1;
         }
     }
@@ -153,7 +148,60 @@ public class MongoDbAdapter {
         return null;
     }
 
-    public OGuild loadRes(FindIterable<Document> findIterable) {
-        return new OGuild();
+    public OGuild loadGuild(TextChannel channel) {
+        return loadGuild(channel.getGuild());
     }
+
+    public OGuild loadGuild(Guild guild) {
+        return loadGuild(guild.getId());
+    }
+
+    public OGuild loadGuild(String guildId) {
+        OGuild guild = new OGuild();
+        Document doc = getCollection("guildSettings").find(Filters.eq("guildId", guildId)).first();
+        guild.guildId = guildId;
+        if (doc != null) {
+            guild.announceSongs = doc.getString("announceSongs");
+            guild.djOnly = doc.getString("djOnly");
+            guild.djRole = doc.getString("djRole");
+            guild.prefix = doc.getString("prefix");
+        } else {
+            GuildSettings guildSettings = GuildSettings.get(Long.parseLong(guildId));
+            guild.announceSongs = guildSettings.getOrDefault(GSetting.ANNOUNCE_SONGS);
+            guild.djOnly = guildSettings.getOrDefault(GSetting.DJ_ONLY);
+            guild.prefix = guildSettings.getOrDefault(GSetting.PREFIX);
+            guild.djRole = guildSettings.getOrDefault(GSetting.DJ_ROLE);
+        }
+        return guild;
+    }
+
+    public int checkGuild(TextChannel channel) {
+        return checkGuild(channel.getGuild());
+    }
+
+    public int checkGuild(Guild guild) {
+        return checkGuild(guild.getId());
+    }
+
+    public int checkGuild(String guildId) {
+        Document doc = getCollection("guildSettings").find(Filters.eq("guildId", guildId)).first();
+        if (doc == null) {
+            update("guildSettings", guildId, Util.guildKeys(), Util.oGuildArray(loadGuild(guildId)));
+        }
+        return 1;
+    }
+
+    public int resetGuild(TextChannel channel) {
+        return resetGuild(channel.getGuild());
+    }
+
+    public int resetGuild(Guild guild) {
+        return resetGuild(guild.getId());
+    }
+
+    public int resetGuild(String guildId) {
+        getCollection("guildSettings").deleteOne(Filters.eq("guildId", guildId));
+        return 1;
+    }
+
 }

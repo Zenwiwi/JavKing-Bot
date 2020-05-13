@@ -16,6 +16,9 @@ public enum TemplateArgument {
 
     TRIUMPH("triumph", "Triumph", e -> "\uD83D\uDE24"),
 
+    PENCIL("pencil", "Pencil", e -> "✏️"),
+    WARNING("warning", "Warning", e -> "⚠️"),
+
     REPEAT("repeat", "Repeat", e -> "\uD83D\uDD01"),
     SKIP("skip", "Skip", e -> "⏭"),
     SHUFFLE("shuffle", "Shuffle", e -> "\uD83D\uDD00"),

@@ -33,7 +33,7 @@ public class leave extends AbstractCommand {
         Guild guild = ((TextChannel) channel).getGuild();
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(guild, bot);
         if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author)) {
-            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**," +
+            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**, " +
                     "Use the join command to summon me");
         }
         if (!playerManager.authorInVoice(inputMessage.getGuild(), author)) {

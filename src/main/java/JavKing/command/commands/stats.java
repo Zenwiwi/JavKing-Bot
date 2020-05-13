@@ -4,6 +4,7 @@ import JavKing.command.meta.AbstractCommand;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
+import JavKing.templates.Templates;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -66,6 +67,7 @@ public class stats extends AbstractCommand {
             channel.sendMessage(embedBuilder.build()).queue();
         } catch (Exception e) {
             e.printStackTrace();
+            return Templates.command.boom.formatFull("**Here arises a new problem! Who knows when a patch is coming!** - 5/12/20");
         }
         return null;
     }

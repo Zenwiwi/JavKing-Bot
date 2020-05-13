@@ -17,7 +17,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.managers.AudioManager;
 
@@ -98,18 +97,18 @@ public class MusicPlayerManager {
         return guildId;
     }
 
-    public synchronized Object playSendYTSCMessage(OMusic music, User author, @Nullable String hex) {
-        if (queue.size() > 1) {
+    public synchronized Object playSendYTSCMessage(OMusic music, @Nullable User author, @Nullable String hex, boolean bool) {
+        if (queue.size() > 1 && bool) {
             EmbedBuilder embed = Templates.music.added_to_queue.clearEmbed()
                     .setColor(Color.decode(BotContainer.getDotenv("YOUTUBE")))
-                    .setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl())
                     .setDescription(String.format("[%s](%s)", music.title, music.uri))
                     .setThumbnail(music.thumbnail)
                     .addField("Channel", music.author, true)
                     .addField("Song Duration", TimeUtil.millisecondsToHHMMSS(music.duration), true)
                     .addField("ET Until Playing", TimeUtil.millisecondsToHHMMSS(totTimeSeconds - queue.get(queue.size() - 1).duration), true)
-                    .addField("Position In Queue", String.valueOf(queue.size() - 1), true);
-            embed.setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
+                    .addField("Position In Queue", String.valueOf(queue.size() - 1), true)
+                    .setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
+            if (author != null) embed.setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl());
             return embed;
         } else {
             return Templates.music.playing_now.formatFull("**Playing** :notes: `" + music.title + "` - Now!");
@@ -214,18 +213,6 @@ public class MusicPlayerManager {
         return channel != null;
     }
 
-    public synchronized boolean checkDiscordBotPerms(MessageChannel channel, Permission permission) {
-        return checkDiscordBotPerms((TextChannel) channel, permission);
-    }
-
-    public synchronized boolean checkDiscordBotPerms(TextChannel channel, Permission permission) {
-        return (channel).getGuild().getSelfMember().hasPermission(channel, permission);
-    }
-
-    public synchronized boolean checkDiscordBotVCPerms(VoiceChannel channel, Permission permission) {
-        return channel.getGuild().getSelfMember().hasPermission(channel, permission);
-    }
-
     public synchronized boolean isInRepeatMode() {
         return inRepeatMode;
     }
@@ -273,7 +260,7 @@ public class MusicPlayerManager {
                         addToQueue(music);
                         if (count++ == 0) {
                             Util.sendMessage(playSendYTSCMessage(queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
-                                    (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD"))), message);
+                                    (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD")), true), message);
                         }
                     }
                 } catch (Exception ignored) {
@@ -322,6 +309,9 @@ public class MusicPlayerManager {
         playerManager.loadItemOrdered(player, Util.idOrURI(trackToAdd), new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
+                if (BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).announceSongs.equalsIgnoreCase("on")) {
+                    Util.sendMessage(playSendYTSCMessage(trackToAdd, null, null, false), BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).channelId, bot);
+                }
                 scheduler.queue(track);
                 startPlaying();
             }

@@ -4,17 +4,13 @@ import JavKing.command.model.OMusic;
 import JavKing.handler.MusicPlayerManager;
 import JavKing.main.BotContainer;
 import com.google.common.base.Joiner;
-import com.mongodb.client.model.Filters;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import org.bson.Document;
 
 import javax.annotation.Nullable;
 
@@ -29,7 +25,7 @@ public class SCSearch {
             OMusic music = resolveSCVideoParameters(uri, author, message, playerManager);
             LPUtil.updateLPURI(music.id, music.uri, music.title, music.thumbnail, message.getGuild().getId());
             playerManager.getLinkedQueue().offer(music);
-            Util.sendMessage(playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("SOUNDCLOUD")), message);
+            Util.sendMessage(playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("SOUNDCLOUD"), true), message);
         }
         playerManager.startPlaying();
     }

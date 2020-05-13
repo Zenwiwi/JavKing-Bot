@@ -5,10 +5,8 @@ import JavKing.command.model.OMusic;
 import JavKing.handler.MusicPlayerManager;
 import JavKing.main.BotContainer;
 import JavKing.templates.Templates;
-import com.mongodb.client.model.Filters;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import org.bson.Document;
 
 public class LPUtil {
 
@@ -22,7 +20,7 @@ public class LPUtil {
             } else if (YTUtil.isVideoCode(uri)) {
                 OMusic search = new YTSearch().resolveVideoParameters(uri, author);
                 play.processTrack(search, playerManager);
-                return playerManager.playSendYTSCMessage(search, author, BotContainer.getDotenv("YOUTUBE"));
+                return playerManager.playSendYTSCMessage(search, author, BotContainer.getDotenv("YOUTUBE"), true);
             } else if (YTUtil.isPlaylistCode(uri)) {
                 playerManager.playlistAdd(uri, author, message);
                 return null;

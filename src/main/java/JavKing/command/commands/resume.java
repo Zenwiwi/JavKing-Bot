@@ -33,7 +33,7 @@ public class resume extends AbstractCommand {
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(inputMessage.getGuild(), bot);
         if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author)) {
-            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**," +
+            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**, " +
                     "Use the join command to summon me");
         }
         if (!playerManager.authorInVoice(inputMessage.getGuild(), author)) {

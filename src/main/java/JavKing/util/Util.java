@@ -1,21 +1,24 @@
 package JavKing.util;
 
+import JavKing.command.model.OGuild;
 import JavKing.command.model.OMusic;
 import JavKing.main.BotContainer;
-import JavKing.templates.ErrorTemplate;
+import JavKing.main.DiscordBot;
 import com.mongodb.client.model.Filters;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import org.bson.Document;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 public class Util {
     /**
      * -based on boolean method is this true-
+     *
      * @return True for uri (SC), False for id (YT)
      */
     public static String idOrURI(OMusic trackToAdd) {
@@ -53,11 +56,38 @@ public class Util {
         return thumbnail;
     }
 
-    public static String capitalize(String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
+    public static boolean checkStr(String str) {
+        return str == null || str.isEmpty();
+    }
+
+    public static String capitalize(String str, boolean bool) {
+        if (checkStr(str)) return str;
+
+        str = str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+        return bool ? str.replaceAll("[dDjJ]{2}", "DJ") : str;
+    }
+
+    public static String capitalizeAll(String str, boolean bool) {
+        if (checkStr(str)) return str;
+
+        StringBuilder sb = new StringBuilder();
+        for (String s : str.split("\\s+")) {
+            sb.append(s.substring(0, 1).toUpperCase()).append(s.substring(1).toLowerCase()).append(" ");
         }
-        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+        return bool ? sb.toString().replaceAll("[DdJj]{2}", "DJ") : sb.toString();
+    }
+
+    public static String camelCase(String str, String regex, String delimiter) {
+        if (checkStr(str)) return str;
+
+        List<String> sList = Arrays.asList(str.split(regex));
+        sList.set(0, sList.get(0).toLowerCase());
+        for (int i = 1; i < sList.size(); i++) sList.set(i, capitalize(sList.get(i), false));
+        return String.join(delimiter, sList);
+    }
+
+    public static String surround(String str, String toSur) {
+        return toSur + str + toSur;
     }
 
     public static void removeDupes(Object[] objects, int length) {
@@ -69,6 +99,10 @@ public class Util {
             }
         }
         objects[j++] = objects[length - 1];
+    }
+
+    public static void sendMessage(Object toSend, String channelId, DiscordBot bot) {
+        sendMessage(toSend, bot.getJDA().getTextChannelById(channelId));
     }
 
     public static void sendMessage(Object toSend, Message message) {
@@ -83,6 +117,8 @@ public class Util {
         if (toSend != null) {
             if (toSend instanceof EmbedBuilder) {
                 channel.sendMessage(((EmbedBuilder) toSend).build()).queue();
+            } else if (toSend instanceof File) {
+                channel.sendFile((File) toSend).queue();
             } else {
                 channel.sendMessage(toSend.toString()).queue();
             }
@@ -99,5 +135,13 @@ public class Util {
 
     public static String[] lastPlayedKeys() {
         return new String[]{"guildId", "uri", "id", "thumbnail", "title"};
+    }
+
+    public static String[] guildKeys() {
+        return new String[]{"announceSongs", "djOnly", "djRole", "prefix", "reset"};
+    }
+
+    public static String[] oGuildArray(OGuild guild) {
+        return new String[]{guild.announceSongs, guild.djOnly, guild.djRole, guild.prefix, null};
     }
 }

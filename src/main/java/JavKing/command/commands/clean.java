@@ -2,7 +2,6 @@ package JavKing.command.commands;
 
 import JavKing.command.meta.AbstractCommand;
 import JavKing.handler.CommandHandler;
-import JavKing.handler.MusicPlayerManager;
 import JavKing.main.DiscordBot;
 import JavKing.templates.Templates;
 import JavKing.util.DisUtil;
@@ -42,12 +41,12 @@ public class clean extends AbstractCommand {
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         List<Message> messageList = channel.getHistory().retrievePast(100).complete();
         List<Message> toDelete = new ArrayList<>();
-        MusicPlayerManager playerManager = MusicPlayerManager.getFor(inputMessage.getGuild(), bot);
-        if (!playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_MANAGE)) {
-            return Templates.command.x_mark.formatFull("**Missing permission `" + Permission.MESSAGE_MANAGE.getName() + "` needed to delete messages!**");
-        }
+
+        String perms = DisUtil.discordBotPermsCHANNEL(channel, new Permission[]{Permission.MESSAGE_MANAGE});
+        if (perms != null) return perms;
+
         for (Message message : messageList) {
-            String content = message.getContentDisplay();
+            String content = message.getContentDisplay().toLowerCase();
             if (content.startsWith(DisUtil.getCommandPrefix(channel))) {
                 String cmd = DisUtil.filterPrefix(content, channel);
                 cmd = cmd.contains(" ") ? cmd.split("\\s+")[0] : cmd;

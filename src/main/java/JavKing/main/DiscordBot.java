@@ -51,6 +51,7 @@ public class DiscordBot {
                 .setActivity(Activity.streaming("Loli Hentai", BotContainer.getDotenv("TWITCH_URI")))
                 .setEventManager(new JDAEventManager(this))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .setAutoReconnect(true)
                 .build()
                 .awaitReady());
         jda.get().addEventListener(new JDAEvents(this));
@@ -72,6 +73,7 @@ public class DiscordBot {
         if (author == null || author.isBot() || channel.getType() != ChannelType.TEXT) {
             return;
         }
+
         if (CommandHandler.isCommand(channel, message.getContentRaw().trim(), message.getContentRaw().split("\\s+"))) {
             CommandHandler.process(this, channel, author, message);
         }

@@ -5,7 +5,9 @@ import JavKing.command.model.OMusic;
 import JavKing.handler.MusicPlayerManager;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
+import JavKing.util.DisUtil;
 import JavKing.util.TimeUtil;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -37,6 +39,9 @@ public class queue extends AbstractCommand {
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         MusicPlayerManager musicPlayerManager = MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot);
+
+        String perms = DisUtil.discordBotPermsCHANNEL(channel, Permission.MESSAGE_EMBED_LINKS);
+        if (perms != null) return perms;
 
         List<OMusic> queue = musicPlayerManager.getLinkedQueue();
         if (queue.isEmpty()) {

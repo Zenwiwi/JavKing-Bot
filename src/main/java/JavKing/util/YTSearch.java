@@ -5,9 +5,7 @@ import JavKing.main.BotContainer;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.common.base.Joiner;
-import com.mongodb.client.model.Filters;
 import net.dv8tion.jda.api.entities.User;
-import org.bson.Document;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

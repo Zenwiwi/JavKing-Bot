@@ -2,13 +2,12 @@ package JavKing.command.commands;
 
 import JavKing.command.meta.AbstractCommand;
 import JavKing.handler.MusicPlayerManager;
+import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.Templates;
+import JavKing.util.DisUtil;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.*;
 
 public class join extends AbstractCommand {
     @Override
@@ -40,17 +39,14 @@ public class join extends AbstractCommand {
             if (vc == null) {
                 return Templates.command.x_mark.formatFull("**You must be in a voice channel first!**");
             }
-            if (!playerManager.checkDiscordBotVCPerms(vc, Permission.VOICE_CONNECT)) {
-                return Templates.command.triumph.formatFull("**No permission to connect to `" + vc.getName() + "`**");
-            }
-            if (!playerManager.checkDiscordBotVCPerms(vc, Permission.VOICE_SPEAK)) {
-                return Templates.command.triumph.formatFull("**No permission to speak in `" + vc.getName() + "`**");
-            }
-            if (!playerManager.checkDiscordBotPerms(channel, Permission.MESSAGE_WRITE)) {
-                return Templates.command.triumph.formatFull("**No permission to send message in `" + channel.getName() + "`**");
-            }
+
+            String perms = DisUtil.discordBotPermsVOICE(vc, new Permission[]{Permission.VOICE_SPEAK, Permission.VOICE_CONNECT}) +
+                    DisUtil.discordBotPermsCHANNEL(channel, new Permission[]{Permission.MESSAGE_WRITE});
+            if (!perms.equals("nullnull")) return perms;
+
             try {
                 playerManager.connectTo(vc);
+                BotContainer.mongoDbAdapter.update("guildSettings", (TextChannel) channel, "channelId", channel.getId());
                 return Templates.command.check_mark.formatFull("**Connected to `" + vc.getName() + "` and bound to `" + channel.getName() + "`!**");
             } catch (Exception e) {
                 e.printStackTrace();

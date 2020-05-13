@@ -3,6 +3,7 @@ package JavKing.util;
 import JavKing.guildSettings.GSetting;
 import JavKing.handler.DefaultGuildSettings;
 import JavKing.handler.GuildSettings;
+import JavKing.templates.Templates;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
@@ -255,5 +256,43 @@ public class DisUtil {
      */
     public static boolean isChannelMention(String input) {
         return channelPattern.matcher(input).matches();
+    }
+
+    public static String discordBotPermsVOICE(VoiceChannel vc, Permission permission) {
+        return discordBotPermsVOICE(vc, new Permission[]{permission});
+    }
+
+    public static String discordBotPermsVOICE(VoiceChannel vc, Permission[] permissions) {
+        for (Permission permission : permissions) {
+            if (!checkDiscordBotVCPerms(vc, permission)) {
+                return Templates.command.triumph.formatFull("**No permission to " + permission.getName() + " to `" + vc.getName() + "`**");
+            }
+        }
+        return null;
+    }
+
+    public static String discordBotPermsCHANNEL(MessageChannel channel, Permission permission) {
+        return discordBotPermsCHANNEL(channel, new Permission[]{permission});
+    }
+
+    public static String discordBotPermsCHANNEL(MessageChannel channel, Permission[] permissions) {
+        for (Permission permission : permissions) {
+            if (!checkDiscordBotPerms(channel, permission)) {
+                return Templates.command.triumph.formatFull("**No permission to " + permission.getName() + " in `" + channel.getName() + "`**");
+            }
+        }
+        return null;
+    }
+
+    private static boolean checkDiscordBotVCPerms(VoiceChannel channel, Permission permission) {
+        return channel.getGuild().getSelfMember().hasPermission(channel, permission);
+    }
+
+    private static boolean checkDiscordBotPerms(MessageChannel channel, Permission permission) {
+        return checkDiscordBotPerms((TextChannel) channel, permission);
+    }
+
+    private static boolean checkDiscordBotPerms(TextChannel channel, Permission permission) {
+        return (channel).getGuild().getSelfMember().hasPermission(channel, permission);
     }
 }
