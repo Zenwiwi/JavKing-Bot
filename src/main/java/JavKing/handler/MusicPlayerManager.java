@@ -44,7 +44,6 @@ public class MusicPlayerManager {
     private volatile long pauseStart = 0;
     private long totTimeSeconds = 0;
     private volatile LinkedList<OMusic> queue;
-    private static int counter = 0;
 //    private volatile int queueLength = 0;
 //    private YTSearch ytSearch;
 
@@ -225,7 +224,6 @@ public class MusicPlayerManager {
     public synchronized void addToQueue(OMusic music) {
         queue.offer(music);
         totTimeSeconds += music.duration;
-        counter++;
     }
 
     public synchronized void addSCToQueue(String[] args, User author, Message message, MusicPlayerManager playerManager) {
@@ -311,7 +309,7 @@ public class MusicPlayerManager {
         playerManager.loadItemOrdered(player, Util.idOrURI(trackToAdd), new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                if (BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).announceSongs.equalsIgnoreCase("on") && counter > 1) {
+                if (BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).announceSongs.equalsIgnoreCase("on")) {
                     Util.sendMessage(playSendYTSCMessage(trackToAdd, null, null, false), BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).channelId, bot);
                 }
                 scheduler.queue(track);
@@ -440,7 +438,6 @@ public class MusicPlayerManager {
             if (poll != null) {
                 player.startTrack(poll, false);
             } else {
-                counter = 0;
                 new LeaveTimer().startTimer();
             }
         }

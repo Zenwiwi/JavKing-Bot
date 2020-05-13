@@ -9,6 +9,7 @@ import JavKing.templates.ErrorTemplate;
 import JavKing.templates.Templates;
 import JavKing.util.*;
 import com.google.common.base.Joiner;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 
@@ -115,7 +116,9 @@ public class play extends AbstractCommand {
         } else
             return ErrorTemplate.formatFull(bot, getCommand(), channel, author, inputMessage);
 
-        if (toSend != null) Util.sendMessage(toSend, inputMessage);
+        if (BotContainer.mongoDbAdapter.loadGuild((TextChannel) channel).announceSongs.equalsIgnoreCase("on")) {
+            if (toSend instanceof EmbedBuilder) Util.sendMessage(toSend, inputMessage);
+        } else Util.sendMessage(toSend, inputMessage);
         return null;
     }
 }
