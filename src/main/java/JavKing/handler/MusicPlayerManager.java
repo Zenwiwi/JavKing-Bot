@@ -140,7 +140,6 @@ public class MusicPlayerManager {
                 scheduler.skipTrack();
             }
         }
-        counter++;
     }
 
     public synchronized boolean togglePause() {
@@ -226,6 +225,7 @@ public class MusicPlayerManager {
     public synchronized void addToQueue(OMusic music) {
         queue.offer(music);
         totTimeSeconds += music.duration;
+        counter++;
     }
 
     public synchronized void addSCToQueue(String[] args, User author, Message message, MusicPlayerManager playerManager) {
