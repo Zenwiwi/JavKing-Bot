@@ -105,12 +105,12 @@ public class play extends AbstractCommand {
                         playerManager.leave();
                     }
                     playerManager.connectTo(vc);
-                    BotContainer.mongoDbAdapter.update("guildSettings", (TextChannel) channel, "channelId", channel.getId());
                 } catch (Exception e) {
                     e.printStackTrace();
                     return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
                 }
             }
+            BotContainer.mongoDbAdapter.update("guildSettings", (TextChannel) channel, "channelId", channel.getId());
             playerManager.startPlaying();
         } else
             return ErrorTemplate.formatFull(bot, getCommand(), channel, author, inputMessage);
