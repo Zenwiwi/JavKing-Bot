@@ -165,12 +165,14 @@ public class MongoDbAdapter {
             guild.djOnly = doc.getString("djOnly");
             guild.djRole = doc.getString("djRole");
             guild.prefix = doc.getString("prefix");
+            guild.channelId = doc.getString("channelId");
         } else {
             GuildSettings guildSettings = GuildSettings.get(Long.parseLong(guildId));
             guild.announceSongs = guildSettings.getOrDefault(GSetting.ANNOUNCE_SONGS);
             guild.djOnly = guildSettings.getOrDefault(GSetting.DJ_ONLY);
             guild.prefix = guildSettings.getOrDefault(GSetting.PREFIX);
             guild.djRole = guildSettings.getOrDefault(GSetting.DJ_ROLE);
+            guild.channelId = "";
         }
         return guild;
     }
