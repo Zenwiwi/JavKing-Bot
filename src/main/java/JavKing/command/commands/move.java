@@ -24,7 +24,7 @@ public class move extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[]{"move [song position] [new position]"};
+        return new String[]{"<song position> <new position>"};
     }
 
     @Override

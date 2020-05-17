@@ -34,7 +34,7 @@ public class lyrics extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[]{"lyrics <song>"};
+        return new String[]{"<song>"};
     }
 
     @Override

@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class file extends AbstractCommand {
 
@@ -25,7 +27,7 @@ public class file extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[]{"file <filename>"};
+        return new String[]{"<filename>"};
     }
 
     @Override
@@ -33,30 +35,13 @@ public class file extends AbstractCommand {
         return new String[]{"f"};
     }
 
-//    public static File findFiles(File[] files, String filename) {
-//        for (File file : files) {
-//            if (file.isDirectory()) {
-//                findFiles(Objects.requireNonNull(file.listFiles()), filename);
-//            } else {
-//                if (file.getName().equalsIgnoreCase(filename)) {
-//                    return file;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         if (!author.getId().equals("257214680823627777") || args.length == 0)
             return ErrorTemplate.formatFull(bot, getCommand(), channel, author, inputMessage);
         File file = new File(args[0]);
-//        if (!file.exists()) {
-//            File[] files = new File(System.getProperty("user.dir")).listFiles();
-//            file = findFiles(files, args[0]);
-//        }
-//        System.out.println(file);
-        if (file != null && file.exists()) {
+
+        if (file.exists()) {
             try {
                 Util.sendMessage(file, inputMessage);
                 return null;

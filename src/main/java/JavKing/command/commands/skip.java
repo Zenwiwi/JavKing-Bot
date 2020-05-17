@@ -22,7 +22,7 @@ public class skip extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[]{"skip [int]"};
+        return new String[]{"<int>"};
     }
 
     @Override

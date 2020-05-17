@@ -98,7 +98,7 @@ public class MusicPlayerManager {
     }
 
     public synchronized Object playSendYTSCMessage(OMusic music, @Nullable User author, @Nullable String hex,
-            boolean bool) {
+                                                   boolean bool) {
         if (queue.size() > 1 && bool) {
             EmbedBuilder embed = Templates.music.added_to_queue.clearEmbed()
                     .setColor(Color.decode(BotContainer.getDotenv("YOUTUBE")))
@@ -189,8 +189,7 @@ public class MusicPlayerManager {
 
     public boolean leave() {
         if (!queue.isEmpty()) {
-            for (OMusic music : queue)
-                totTimeSeconds -= music.duration;
+            totTimeSeconds = 0;
             queue.clear();
         }
         if (isConnected())
@@ -207,19 +206,27 @@ public class MusicPlayerManager {
     }
 
     public boolean isInVoiceWith(Guild guild, User author) {
-        VoiceChannel channel = guild.getMember(author).getVoiceState().getChannel();
-        if (channel == null)
+        try {
+            VoiceChannel channel = guild.getMember(author).getVoiceState().getChannel();
+            if (channel == null)
+                return false;
+            for (Member user : channel.getMembers()) {
+                if (user.getUser().getId().equals(guild.getJDA().getSelfUser().getId()))
+                    return true;
+            }
             return false;
-        for (Member user : channel.getMembers()) {
-            if (user.getUser().getId().equals(guild.getJDA().getSelfUser().getId()))
-                return true;
+        } catch (NullPointerException e) {
+            return false;
         }
-        return false;
     }
 
     public boolean authorInVoice(Guild guild, User author) {
-        VoiceChannel channel = guild.getMember(author).getVoiceState().getChannel();
-        return channel != null;
+        try {
+            VoiceChannel channel = guild.getMember(author).getVoiceState().getChannel();
+            return channel != null;
+        } catch (NullPointerException e) {
+            return false;
+        }
     }
 
     public synchronized boolean isInRepeatMode() {
@@ -236,7 +243,7 @@ public class MusicPlayerManager {
     }
 
     public synchronized void addSCToQueue(String[] args, User author, Message message,
-            MusicPlayerManager playerManager) {
+                                          MusicPlayerManager playerManager) {
         new SCSearch().resolveSCURI(args, author, message, playerManager);
     }
 
@@ -307,9 +314,7 @@ public class MusicPlayerManager {
                         return;
                     }
                     try {
-                        if (isConnected()) {
-                            leave();
-                        }
+                        if (isConnected()) leave();
                         connectTo(vc);
                     } catch (Exception e) {
                         Util.sendMessage(Templates.command.x_mark
@@ -338,19 +343,18 @@ public class MusicPlayerManager {
             return;
         }
         final OMusic trackToAdd = queue.get(0);
-        if (trackToAdd == null) {
-            return;
-        }
+        if (trackToAdd == null) return;
+
         playerManager.loadItemOrdered(player, Util.idOrURI(trackToAdd), new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
+                scheduler.queue(track);
+                startPlaying();
                 if (BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).announceSongs
                         .equalsIgnoreCase("on")) {
                     Util.sendMessage(playSendYTSCMessage(trackToAdd, null, null, false),
                             BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).channelId, bot);
                 }
-                scheduler.queue(track);
-                startPlaying();
             }
 
             @Override
@@ -375,13 +379,11 @@ public class MusicPlayerManager {
     }
 
     public void trackStarted() {
-        new LeaveTimer().stopTimer();
     }
 
     public String skipTrack(@Nullable String toIndex) {
-        if (queue.size() == 0) {
-            return Templates.command.x_mark.formatFull("**Nothing playing in this server**");
-        }
+        if (queue.size() == 0) return Templates.command.x_mark.formatFull("**Nothing playing in this server**");
+
         if (toIndex == null) {
             totTimeSeconds -= queue.get(0).duration;
             queuePoll();
@@ -399,36 +401,11 @@ public class MusicPlayerManager {
         }
     }
 
-    public static class LeaveTimer {
-        static int interval;
-        static Timer timer;
-
-        public void startTimer() {
-            timer = new Timer();
-            interval = 240000;
-            timer.scheduleAtFixedRate(new TimerTask() {
-
-                public void run() {
-                    countdownTimer();
-                }
-            }, 1000, 1000);
-        }
-
-        private static final int countdownTimer() {
-            if (interval == 1) {
-                timer.cancel();
-            }
-            return --interval;
-        }
-
-        public void stopTimer() {
-            timer.cancel();
-        }
-    }
-
     public class TrackScheduler extends AudioEventAdapter {
         private final AudioPlayer player;
         private final BlockingQueue<AudioTrack> queue;
+        private long interval;
+        private Timer timer;
         // private volatile String lastRequester = "";
 
         /**
@@ -463,7 +440,7 @@ public class MusicPlayerManager {
 
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
-            trackStarted();
+            stopTimer();
         }
 
         public void skipTrack() {
@@ -477,8 +454,31 @@ public class MusicPlayerManager {
             if (poll != null) {
                 player.startTrack(poll, false);
             } else {
-                new LeaveTimer().startTimer();
+                startTimer();
             }
+        }
+
+        public void startTimer() {
+            timer = new Timer();
+            interval = 240000;
+            timer.scheduleAtFixedRate(new TimerTask() {
+
+                public void run() {
+                    countdownTimer();
+                }
+            }, 1000, interval);
+        }
+
+        private long countdownTimer() {
+            if (interval == 1) {
+                player.destroy();
+                timer.cancel();
+            }
+            return --interval;
+        }
+
+        public void stopTimer() {
+            timer.cancel();
         }
 
         @Override

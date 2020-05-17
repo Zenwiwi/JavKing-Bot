@@ -17,7 +17,11 @@ public class TimeUtil {
     }
 
     public static long HHMMSStoMilliseconds(String hms) {
+        return HHMMSStoSeconds(hms) * 1000;
+    }
+
+    public static long HHMMSStoSeconds(String hms) {
         LocalTime localDateTime = LocalTime.parse(hms);
-        return localDateTime.toSecondOfDay() * 1000;
+        return localDateTime.toSecondOfDay();
     }
 }
