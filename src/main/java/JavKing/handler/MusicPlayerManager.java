@@ -1,5 +1,6 @@
 package JavKing.handler;
 
+import JavKing.command.model.OGuild;
 import JavKing.command.model.OMusic;
 import JavKing.handler.audio.AudioPlayerSendHandler;
 import JavKing.main.BotContainer;
@@ -44,6 +45,7 @@ public class MusicPlayerManager {
     private volatile long pauseStart = 0;
     private long totTimeSeconds = 0;
     private volatile LinkedList<OMusic> queue;
+    private long songSkippedErrors = 0;
     // private volatile int queueLength = 0;
     // private YTSearch ytSearch;
 
@@ -123,6 +125,10 @@ public class MusicPlayerManager {
 
     public synchronized void replaceLinkedQueue(LinkedList<OMusic> queue) {
         this.queue = queue;
+    }
+
+    public synchronized void replaceTotTimeSeconds(long duration) {
+        totTimeSeconds = duration;
     }
 
     public synchronized void updateTotTimeSeconds(long duration) {
@@ -332,7 +338,7 @@ public class MusicPlayerManager {
 
             @Override
             public void loadFailed(FriendlyException ignored) {
-
+                Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("Error in audio playback! `ID: " + YTUtil.getPlaylistCode(uri) + "`", "**")), message);
             }
         });
     }
@@ -350,10 +356,16 @@ public class MusicPlayerManager {
             public void trackLoaded(AudioTrack track) {
                 scheduler.queue(track);
                 startPlaying();
-                if (BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).announceSongs
-                        .equalsIgnoreCase("on")) {
+                OGuild guild = BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId));
+                if (songSkippedErrors > 0) {
+                    Util.sendMessage(Templates.command.boom.formatFull(Util.surround("`" + songSkippedErrors +
+                            "` songs skipped due to playback errors. Use `" + DisUtil.getCommandPrefix(guildId) +
+                            "requeue` to requeue lost songs!", "**")), guild.channelId, bot);
+                    songSkippedErrors = 0;
+                }
+                if (guild.announceSongs.equalsIgnoreCase("on")) {
                     Util.sendMessage(playSendYTSCMessage(trackToAdd, null, null, false),
-                            BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId)).channelId, bot);
+                            guild.channelId, bot);
                 }
             }
 
@@ -369,6 +381,7 @@ public class MusicPlayerManager {
 
             @Override
             public void loadFailed(FriendlyException exception) {
+                songSkippedErrors++;
                 trackEnded();
             }
         });

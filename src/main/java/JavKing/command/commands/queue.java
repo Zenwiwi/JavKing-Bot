@@ -3,10 +3,13 @@ package JavKing.command.commands;
 import JavKing.command.meta.AbstractCommand;
 import JavKing.command.model.OMusic;
 import JavKing.handler.MusicPlayerManager;
+import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
+import JavKing.templates.Templates;
 import JavKing.util.DisUtil;
 import JavKing.util.TimeUtil;
+import JavKing.util.Util;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -44,9 +47,9 @@ public class queue extends AbstractCommand {
         if (perms != null) return perms;
 
         List<OMusic> queue = musicPlayerManager.getLinkedQueue();
-        if (queue.isEmpty()) {
-            return "❌ **No songs in current queue!**";
-        }
+        if (queue.isEmpty())
+            return Templates.command.x_mark.formatFull(Util.surround("No songs in current queue!", "**"));
+
 
         int index = args.length == 0 ? 1 : Integer.parseInt(args[0]);
         int items = 10;
@@ -63,8 +66,8 @@ public class queue extends AbstractCommand {
                 " Requested By: " + nP.requestedBy + "`\n\n";
 
         StringBuilder sb = new StringBuilder();
-        String title = "[Queue for " + ((TextChannel) channel).getGuild().getName() + "](https://www.youtube.com)" + repeat +
-            "\n\n__Now Playing__:\n" + nowPlaying;
+        String title = "[Queue for " + ((TextChannel) channel).getGuild().getName() + "](" + BotContainer.getDotenv("HEROKU_SITE") + ")" + repeat +
+                "\n\n__Now Playing__:\n" + nowPlaying;
 
         long totalDuration = 0;
         for (OMusic oMusic : queue) totalDuration += oMusic.duration;
@@ -85,7 +88,7 @@ public class queue extends AbstractCommand {
                 embedTemplate.setDescription(title);
             }
         }
-        channel.sendMessage(embedTemplate.getEmbedBuilder()).queue();
+        Util.sendMessage(embedTemplate, inputMessage);
         return null;
     }
 }

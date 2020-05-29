@@ -4,6 +4,7 @@ import JavKing.command.meta.AbstractCommand;
 import JavKing.handler.CommandHandler;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
+import JavKing.util.DisUtil;
 import JavKing.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDAInfo;
@@ -46,8 +47,8 @@ public class help extends AbstractCommand {
                         : CommandHandler.getAliases().get(args[0]));
                 String description = "[Command] " + command.getCommand() + "\n" +
                         (command.getAlias().length > 0 ? "[Aliases] " + String.join(", ", command.getAlias()) + "\n" : "") +
-                        (command.getUsage().length > 0 ? "[Usage] " + command.getCommand() + " " + String.join(", ", command.getUsage()) + "\n" : "") +
-                        "[Description] " + (command.getDescription() != null ? Util.capitalize(command.getDescription(),false) : "No desc. provided");
+                        (command.getUsage().length > 0 ? "[Usage] " + DisUtil.getCommandPrefix(channel) + command.getCommand() + " " + String.join(", ", command.getUsage()) + "\n" : "") +
+                        "[Description] " + (command.getDescription() != null ? Util.capitalize(command.getDescription(), false) : "No desc. provided");
                 EmbedBuilder embedBuilder = new EmbedTemplate()
                         .setAuthor(bot.getJDA().getSelfUser().getName() + " Help", null, author.getEffectiveAvatarUrl())
                         .setDescription("```ini\n" + description + "```")
@@ -67,8 +68,8 @@ public class help extends AbstractCommand {
                 EmbedBuilder embedBuilder = new EmbedTemplate()
                         .setAuthor(bot.getJDA().getSelfUser().getName() + " Help { JDA v" + JDAInfo.VERSION + " - JVM v" +
                                 System.getProperty("java.version") + " }", null, author.getEffectiveAvatarUrl())
-                        .setTitle("[\uD83D\uDD20 Commands](http://javking-site.herokuapp.com/)")
-                        .setDescription("```ini\n" + sb + "```")
+                        .setTitle("\uD83D\uDD20 Commands (To be removed in the future!)")
+                        .setDescription("[JavKing Site](http://javking-site.herokuapp.com/)```ini\n" + sb + "```")
                         .setThumbnail(bot.getJDA().getSelfUser().getEffectiveAvatarUrl())
                         .setFooter("JavKing©️ from 2020 - " + Calendar.getInstance().get(Calendar.YEAR));
                 channel.sendMessage(embedBuilder.build()).queue();
