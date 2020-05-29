@@ -4,6 +4,7 @@ import JavKing.command.model.OGuild;
 import JavKing.command.model.OMusic;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
+import JavKing.templates.EmbedTemplate;
 import com.mongodb.client.model.Filters;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -119,6 +120,8 @@ public class Util {
                 channel.sendMessage(((EmbedBuilder) toSend).build()).queue();
             } else if (toSend instanceof File) {
                 channel.sendFile((File) toSend).queue();
+            } else if (toSend instanceof EmbedTemplate) {
+                channel.sendMessage(((EmbedTemplate) toSend).getEmbedBuilder()).queue();
             } else {
                 channel.sendMessage(toSend.toString()).queue();
             }
