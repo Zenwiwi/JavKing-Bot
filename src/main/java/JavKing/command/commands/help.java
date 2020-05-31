@@ -29,7 +29,7 @@ public class help extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[0];
+        return new String[]{"[command]"};
     }
 
     @Override

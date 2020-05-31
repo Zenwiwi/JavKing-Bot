@@ -164,6 +164,11 @@ public class MusicPlayerManager {
         return player.isPaused();
     }
 
+    public synchronized boolean setVolume(String volume) {
+        player.setVolume(Integer.parseInt(volume));
+        return true;
+    }
+
     public List<Member> getUsersInVoiceChannel() {
         ArrayList<Member> userList = new ArrayList<>();
         VoiceChannel currentChannel = bot.getJDA().getGuildById(guildId).getAudioManager().getConnectedChannel();

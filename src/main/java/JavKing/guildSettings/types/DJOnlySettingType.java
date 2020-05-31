@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 public class DJOnlySettingType implements IGuildSettingType {
     private final String[] accepted;
+
     public DJOnlySettingType() {
         accepted = new String[]{"on", "off"};
     }

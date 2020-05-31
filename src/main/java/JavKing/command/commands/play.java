@@ -41,7 +41,7 @@ public class play extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[]{"play <string>"};
+        return new String[]{"<url/keywords>"};
     }
 
     @Override
@@ -112,6 +112,7 @@ public class play extends AbstractCommand {
                     return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
                 }
             }
+            playerManager.setVolume(BotContainer.mongoDbAdapter.loadGuild((TextChannel) channel).volume);
             playerManager.startPlaying();
         } else
             return ErrorTemplate.formatFull(bot, getCommand(), channel, author, inputMessage);

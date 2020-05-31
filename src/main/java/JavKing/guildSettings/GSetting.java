@@ -1,9 +1,6 @@
 package JavKing.guildSettings;
 
-import JavKing.guildSettings.types.AnnounceSongsSettingType;
-import JavKing.guildSettings.types.DJOnlySettingType;
-import JavKing.guildSettings.types.DJRoleSettingType;
-import JavKing.guildSettings.types.PrefixSettingType;
+import JavKing.guildSettings.types.*;
 import JavKing.main.BotContainer;
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -12,6 +9,7 @@ public enum GSetting {
     DJ_ONLY("🚷", "off", new DJOnlySettingType(), "DJs only mode", "on/off"),
     DJ_ROLE("\uD83D\uDCC3", BotContainer.getDotenv("DJ"), new DJRoleSettingType(true), "Changes DJ role", "role name"),
     PREFIX("❗", BotContainer.getDotenv("PREFIX"), new PrefixSettingType(1, 4), "Changes prefix for JavKing", "Any text, max of 4 characters"),
+    VOLUME("\uD83D\uDD0A", "100", new VolumeSettingType(), "Sets the volume for audio playback", "range: [0, " + BotContainer.getDotenv("MAX_VOLUME") + "]"),
     RESET("♻️", null, null, null, null);
 
     private final String icon;
