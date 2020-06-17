@@ -204,6 +204,9 @@ public class MusicPlayerManager {
         Guild guild = bot.getJDA().getGuildById(guildId);
         if (guild != null)
             guild.getAudioManager().closeAudioConnection();
+
+        if (inRepeatMode)
+            setRepeat(!inRepeatMode);
         return true;
     }
 
@@ -394,24 +397,23 @@ public class MusicPlayerManager {
     public void trackStarted() {
     }
 
-    public String skipTrack(@Nullable String toIndex) {
+    public synchronized String skipTrack(@Nullable String toIndex) {
         if (queue.size() == 0) return Templates.command.x_mark.formatFull("**Nothing playing in this server**");
 
-        if (toIndex == null) {
-            totTimeSeconds -= queue.get(0).duration;
+        final boolean finalInRepeatMode = inRepeatMode;
+
+        if (finalInRepeatMode) setRepeat(false);
+
+        long duration = 0;
+        for (int i = 0; i < (toIndex == null ? 1 : Integer.parseInt(toIndex)); i++) {
+            duration += queue.get(0).duration;
             queuePoll();
-            scheduler.skipTrack();
-            return Templates.music.skipped_song.formatFull("***Skipped!***");
-        } else {
-            long duration = 0;
-            for (int i = 0; i < Integer.parseInt(toIndex); i++) {
-                duration += queue.get(0).duration;
-                queuePoll();
-            }
-            totTimeSeconds -= duration;
-            scheduler.skipTrack();
-            return Templates.music.skipped_song.formatFull("***Skipped to*** `" + getLinkedQueue().get(0).title + "`");
         }
+        totTimeSeconds -= duration;
+        scheduler.skipTrack();
+        if (finalInRepeatMode) setRepeat(true);
+        return toIndex != null && Integer.parseInt(toIndex) > 1 ? Templates.music.skipped_song.formatFull("***Skipped to*** `" + getLinkedQueue().get(0).title + "`")
+                : Templates.music.skipped_song.formatFull("***Skipped!***");
     }
 
     public class TrackScheduler extends AudioEventAdapter {

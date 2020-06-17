@@ -37,7 +37,7 @@ public class remove extends AbstractCommand {
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot);
-        if (args.length > 1) {
+        if (args.length >= 1) {
             int pos = Integer.parseInt(args[0]), end = 0, count = 0;
             try {
                 end = Integer.parseInt(args[1]);
