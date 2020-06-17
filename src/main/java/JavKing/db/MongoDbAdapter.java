@@ -160,19 +160,21 @@ public class MongoDbAdapter {
         OGuild guild = new OGuild();
         Document doc = getCollection("guildSettings").find(Filters.eq("guildId", guildId)).first();
         guild.guildId = guildId;
-        if (doc != null) {
+        try {
             guild.announceSongs = doc.getString("announceSongs");
             guild.djOnly = doc.getString("djOnly");
             guild.djRole = doc.getString("djRole");
             guild.prefix = doc.getString("prefix");
             guild.channelId = doc.getString("channelId");
-        } else {
+            guild.volume = doc.getString("volume");
+        } catch (Exception ignored) {
             GuildSettings guildSettings = GuildSettings.get(Long.parseLong(guildId));
             guild.announceSongs = guildSettings.getOrDefault(GSetting.ANNOUNCE_SONGS);
             guild.djOnly = guildSettings.getOrDefault(GSetting.DJ_ONLY);
             guild.prefix = guildSettings.getOrDefault(GSetting.PREFIX);
             guild.djRole = guildSettings.getOrDefault(GSetting.DJ_ROLE);
             guild.channelId = "";
+            guild.volume = guildSettings.getOrDefault(GSetting.VOLUME);
         }
         return guild;
     }

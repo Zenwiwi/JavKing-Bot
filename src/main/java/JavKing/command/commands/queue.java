@@ -31,7 +31,7 @@ public class queue extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[]{"queue [int]"};
+        return new String[]{"[page/int]"};
     }
 
     @Override

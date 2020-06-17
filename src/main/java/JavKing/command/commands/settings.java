@@ -3,6 +3,7 @@ package JavKing.command.commands;
 import JavKing.command.meta.AbstractCommand;
 import JavKing.guildSettings.GSetting;
 import JavKing.handler.GuildSettings;
+import JavKing.handler.MusicPlayerManager;
 import JavKing.handler.discord.awaitJDAEvents;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
@@ -27,7 +28,7 @@ public class settings extends AbstractCommand {
 
     @Override
     public String[] getUsage() {
-        return new String[0];
+        return new String[]{"[setting]"};
     }
 
     @Override
@@ -57,6 +58,10 @@ public class settings extends AbstractCommand {
                     } else if (args.length > 1 && gsetting.getSettingType().validate(((TextChannel) channel).getGuild(), updated)) {
                         BotContainer.mongoDbAdapter.update("guildSettings", (TextChannel) channel, Util.camelCase(gsetting.toString(), "_", ""), updated);
                         GuildSettings.get(channel).reloadSettings();
+                        if (args[0].equalsIgnoreCase("volume"))
+                            MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot)
+                                    .setVolume(BotContainer.mongoDbAdapter.loadGuild((TextChannel) channel).volume);
+
                         return Templates.command.blue_check_mark.formatFull("**" + Util.capitalize(setting, true) + " updated to** `" + updated + "`");
                     } else {
                         builder.setTitle("JavKing Settings - " + gsetting.getIcon() + " " + Util.capitalizeAll(setting, true))

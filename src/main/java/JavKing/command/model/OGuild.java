@@ -7,6 +7,7 @@ public class OGuild extends AbstractModel {
     public String channelId = "";
     public String prefix = "";
     public String announceSongs = "";
+    public String volume = "";
     public String djOnly = "";
     public String djRole = "";
 }

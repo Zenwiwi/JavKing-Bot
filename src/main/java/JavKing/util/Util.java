@@ -141,10 +141,10 @@ public class Util {
     }
 
     public static String[] guildKeys() {
-        return new String[]{"announceSongs", "djOnly", "djRole", "prefix", "reset"};
+        return new String[]{"announceSongs", "djOnly", "djRole", "prefix", "volume", "reset"};
     }
 
     public static String[] oGuildArray(OGuild guild) {
-        return new String[]{guild.announceSongs, guild.djOnly, guild.djRole, guild.prefix, null};
+        return new String[]{guild.announceSongs, guild.djOnly, guild.djRole, guild.prefix, guild.volume, null};
     }
 }

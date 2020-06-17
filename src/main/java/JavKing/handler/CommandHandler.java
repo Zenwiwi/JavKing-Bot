@@ -19,7 +19,7 @@ import java.util.Set;
 public class CommandHandler {
     private static HashMap<String, AbstractCommand> commands = new HashMap<>();
     private static HashMap<String, AbstractCommand> commandsAliases = new HashMap<>();
-    private static String[] cmdVOICE = new String[]{"join", "play"};
+    private static final String[] cmdVOICE = new String[]{"join", "play"};
 //    private static String[] cmdCHANNEL = new String[]{"clean", "lyrics", "queue"};
 
     public static void initialize() {
@@ -105,7 +105,7 @@ public class CommandHandler {
 
         }
         if (output != null) {
-            channel.sendMessage(output).queue();
+            Util.sendMessage(output, incomingMessage);
         }
     }
 
