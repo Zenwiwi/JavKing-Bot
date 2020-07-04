@@ -7,12 +7,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.security.auth.login.LoginException;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.dv8tion.jda.api.requests.GatewayIntent.*;
@@ -45,9 +43,8 @@ public class DiscordBot {
     }
 
     public void restartJDA() throws LoginException, InterruptedException {
-        GatewayIntent[] intents = new GatewayIntent[]{GUILD_MESSAGES, GUILD_VOICE_STATES, DIRECT_MESSAGES, GUILD_MEMBERS, GUILD_PRESENCES,
-        GUILD_EMOJIS};
-        jda.set(JDABuilder.create(BotContainer.getDotenv("TOKEN"), Arrays.asList(intents))
+        jda.set(JDABuilder.create(BotContainer.getDotenv("TOKEN"), GUILD_MESSAGES, GUILD_VOICE_STATES, DIRECT_MESSAGES, GUILD_MEMBERS, GUILD_PRESENCES,
+                GUILD_EMOJIS)
                 .setActivity(Activity.streaming("Loli Hentai", BotContainer.getDotenv("TWITCH_URI")))
                 .setEventManager(new JDAEventManager(this))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)

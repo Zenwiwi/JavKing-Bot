@@ -1,10 +1,9 @@
 package JavKing.handler.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
+import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
@@ -15,7 +14,9 @@ import java.nio.ByteBuffer;
 public class AudioPlayerSendHandler implements AudioSendHandler {
     private final AudioPlayer audioPlayer;
     private final ByteBuffer buffer;
-    private final MutableAudioFrame frame;
+//    private final MutableAudioFrame frame;
+
+    private AudioFrame lastFrame;
 
     /**
      * @param audioPlayer Audio player to wrap.
@@ -23,21 +24,27 @@ public class AudioPlayerSendHandler implements AudioSendHandler {
     public AudioPlayerSendHandler(AudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;
         this.buffer = ByteBuffer.allocate(1024);
-        this.frame = new MutableAudioFrame();
-        this.frame.setBuffer(buffer);
+//        this.frame = new MutableAudioFrame();
+//        this.frame.setBuffer(buffer);
     }
 
     @Override
     public boolean canProvide() {
         // returns true if audio was provided
-        return audioPlayer.provide(frame);
+        if (lastFrame == null) lastFrame = audioPlayer.provide();
+        return lastFrame != null;
+//        return audioPlayer.provide(frame);
     }
 
     @Override
     public ByteBuffer provide20MsAudio() {
         // flip to make it a read buffer
-        ((Buffer) buffer).flip();
-        return buffer;
+//        ((Buffer) buffer).flip();
+//        return buffer;
+        if (lastFrame == null) lastFrame = audioPlayer.provide();
+        byte[] data = lastFrame != null ? lastFrame.getData() : null;
+        lastFrame = null;
+        return data == null ? null : ByteBuffer.wrap(data);
     }
 
     @Override

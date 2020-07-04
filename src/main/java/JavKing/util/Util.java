@@ -8,13 +8,15 @@ import JavKing.templates.EmbedTemplate;
 import com.mongodb.client.model.Filters;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.Document;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class Util {
     /**
@@ -32,17 +34,26 @@ public class Util {
 
     public static String resolveThumbnail(AudioTrack track, Message message) {
         String thumbnail = null;
-        Document doc = (Document) BotContainer.mongoDbAdapter.getCollection("playlistThumbnail").find(Filters.eq("uri", track.getInfo().uri)).first();
+        Document doc = BotContainer.mongoDbAdapter.getCollection("playlistThumbnail").find(Filters.eq("uri", track.getInfo().uri)).first();
         try {
             if (doc != null && doc.getString("id").equals(track.getIdentifier()) && doc.getString("thumbnail") != null) {
                 thumbnail = doc.getString("thumbnail");
             } else {
+                String id = track.getIdentifier();
                 if (track.getSourceManager().getSourceName().equals("youtube")) {
-                    thumbnail = Objects.requireNonNull(new YTSearch().resolveVideoParameters(track.getInfo().uri, null)).thumbnail;
-                } else thumbnail = message.getEmbeds().get(0).getThumbnail().getUrl();
+                    OMusic music = new YTSearch().resolveVideoParameters(track.getInfo().uri, null);
+                    thumbnail = music == null || music.thumbnail == null || music.thumbnail.equals("")
+                            ? "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"
+                            : music.thumbnail;
+                } else {
+                    do {
+                        MessageEmbed.Thumbnail thumbnailMessage = message.getEmbeds().get(0).getThumbnail();
+                        assert thumbnailMessage != null;
+                        thumbnail = thumbnailMessage.getUrl() == null ? thumbnailMessage.getProxyUrl() : thumbnailMessage.getUrl();
+                    } while (thumbnail == null);
+                    return thumbnail;
+                }
                 try {
-                    String id = track.getIdentifier();
-                    thumbnail = "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
                     BotContainer.mongoDbAdapter.getCollection("playlistThumbnail").findOneAndUpdate(Filters.eq("id", id),
                             new Document("guildId", message.getGuild().getId()).append("uri", track.getInfo().uri).append("id", id)
                                     .append("thumbnail", thumbnail));
@@ -52,7 +63,6 @@ public class Util {
                 }
             }
         } catch (Exception ignored) {
-
         }
         return thumbnail;
     }

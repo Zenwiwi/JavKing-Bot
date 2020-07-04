@@ -45,7 +45,6 @@ public class MusicPlayerManager {
     private volatile long pauseStart = 0;
     private long totTimeSeconds = 0;
     private volatile LinkedList<OMusic> queue;
-    private long songSkippedErrors = 0;
     // private volatile int queueLength = 0;
     // private YTSearch ytSearch;
 
@@ -111,8 +110,7 @@ public class MusicPlayerManager {
                             TimeUtil.millisecondsToHHMMSS(totTimeSeconds - queue.get(queue.size() - 1).duration), true)
                     .addField("Position In Queue", String.valueOf(queue.size() - 1), true)
                     .setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
-            if (author != null)
-                embed.setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl());
+            if (author != null) embed.setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl());
             return embed;
         } else {
             return Templates.music.playing_now.formatFull("**Playing** :notes: `" + music.title + "` - Now!");
@@ -196,6 +194,30 @@ public class MusicPlayerManager {
     public boolean isConnected() {
         Guild guildById = bot.getJDA().getGuildById(guildId);
         return guildById != null && guildById.getAudioManager().getConnectedChannel() != null;
+    }
+
+    public synchronized void playCheckVoice(Message message, User author) {
+        if (!isInVoiceWith(message.getGuild(), author) && !getLinkedQueue().isEmpty()) {
+            VoiceChannel vc = Objects
+                    .requireNonNull(
+                            Objects.requireNonNull(message.getGuild().getMember(author)).getVoiceState())
+                    .getChannel();
+            if (vc == null) {
+                Util.sendMessage(
+                        Templates.command.x_mark.formatFull("**You must be in a voice channel first!**"),
+                        message);
+                return;
+            }
+            try {
+                if (isConnected()) leave();
+                connectTo(vc);
+            } catch (Exception e) {
+                Util.sendMessage(Templates.command.x_mark
+                        .formatFull("**Can't connect to voice channel, please try again!**"), message);
+                return;
+            }
+            startPlaying();
+        }
     }
 
     public boolean leave() {
@@ -316,27 +338,7 @@ public class MusicPlayerManager {
                 } catch (Exception ignored) {
 
                 }
-                if (!isInVoiceWith(message.getGuild(), author) && !getLinkedQueue().isEmpty()) {
-                    VoiceChannel vc = Objects
-                            .requireNonNull(
-                                    Objects.requireNonNull(message.getGuild().getMember(author)).getVoiceState())
-                            .getChannel();
-                    if (vc == null) {
-                        Util.sendMessage(
-                                Templates.command.x_mark.formatFull("**You must be in a voice channel first!**"),
-                                message);
-                        return;
-                    }
-                    try {
-                        if (isConnected()) leave();
-                        connectTo(vc);
-                    } catch (Exception e) {
-                        Util.sendMessage(Templates.command.x_mark
-                                .formatFull("**Can't connect to voice channel, please try again!**"), message);
-                        return;
-                    }
-                    startPlaying();
-                }
+                playCheckVoice(message, author);
             }
 
             @Override
@@ -365,12 +367,6 @@ public class MusicPlayerManager {
                 scheduler.queue(track);
                 startPlaying();
                 OGuild guild = BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId));
-                if (songSkippedErrors > 0) {
-                    Util.sendMessage(Templates.command.boom.formatFull(Util.surround("`" + songSkippedErrors +
-                            "` songs skipped due to playback errors. Use `" + DisUtil.getCommandPrefix(guildId) +
-                            "requeue` to requeue lost songs!", "**")), guild.channelId, bot);
-                    songSkippedErrors = 0;
-                }
                 if (guild.announceSongs.equalsIgnoreCase("on")) {
                     Util.sendMessage(playSendYTSCMessage(trackToAdd, null, null, false),
                             guild.channelId, bot);
@@ -389,7 +385,6 @@ public class MusicPlayerManager {
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                songSkippedErrors++;
                 trackEnded();
             }
         });
@@ -424,9 +419,9 @@ public class MusicPlayerManager {
     public class TrackScheduler extends AudioEventAdapter {
         private final AudioPlayer player;
         private final BlockingQueue<AudioTrack> queue;
-        private long interval;
-        private Timer timer;
-        // private volatile String lastRequester = "";
+//        private long interval;
+//        private Timer timer;
+//        private volatile String lastRequester = "";
 
         /**
          * @param player The audio player this scheduler uses
@@ -460,8 +455,10 @@ public class MusicPlayerManager {
 
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
-            stopTimer();
+//            stopTimer();
         }
+
+
 
         public void skipTrack() {
             trackEnded();
@@ -474,32 +471,32 @@ public class MusicPlayerManager {
             if (poll != null) {
                 player.startTrack(poll, false);
             } else {
-                startTimer();
+//                startTimer();
             }
         }
 
-        public void startTimer() {
-            timer = new Timer();
-            interval = 240000;
-            timer.scheduleAtFixedRate(new TimerTask() {
-
-                public void run() {
-                    countdownTimer();
-                }
-            }, 1000, interval);
-        }
-
-        private long countdownTimer() {
-            if (interval == 1) {
-                player.destroy();
-                timer.cancel();
-            }
-            return --interval;
-        }
-
-        public void stopTimer() {
-            timer.cancel();
-        }
+//        public void startTimer() {
+//            timer = new Timer();
+//            interval = 240000;
+//            timer.scheduleAtFixedRate(new TimerTask() {
+//
+//                public void run() {
+//                    countdownTimer();
+//                }
+//            }, 1000, interval);
+//        }
+//
+//        private long countdownTimer() {
+//            if (interval == 1) {
+//                player.destroy();
+//                timer.cancel();
+//            }
+//            return --interval;
+//        }
+//
+//        public void stopTimer() {
+//            timer.cancel();
+//        }
 
         @Override
         public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
