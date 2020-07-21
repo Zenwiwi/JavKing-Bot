@@ -54,12 +54,10 @@ public class play extends AbstractCommand {
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot);
         TextChannel txt = (TextChannel) channel;
         Guild guild = txt.getGuild();
-        if (!playerManager.authorInVoice(guild, author)) {
+        if (!playerManager.authorInVoice(guild, author))
             return Templates.command.x_mark.formatFull("**You must be in a voice channel first!**");
-        }
 
         Object toSend = null;
-
         if (args.length > 0) {
             channel.sendMessage("<:YT:605943277706936324> **Searching for **\uD83D\uDD0E `" + Joiner.on(" ").join(args) + "`").queue();
 

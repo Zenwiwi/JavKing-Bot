@@ -38,13 +38,14 @@ public class shuffle extends AbstractCommand {
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(inputMessage.getGuild(), bot);
-        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author)) {
-            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**," +
-                    "Use the join command to summon me");
-        }
-        if (!playerManager.authorInVoice(inputMessage.getGuild(), author)) {
+
+        if (!playerManager.authorInVoice(inputMessage.getGuild(), author))
             return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
-        }
+
+        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author))
+            return Templates.command.x_mark.formatFull("**I am currently not connected to your voice channel**," +
+                    "Use the join command to summon me");
+
         if (playerManager.getLinkedQueue().size() <= 0) {
             return Templates.command.x_mark.formatFull("**No elements in queue to shuffle!**");
         }

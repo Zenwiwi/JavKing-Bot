@@ -33,13 +33,14 @@ public class skip extends AbstractCommand {
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot);
-        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author)) {
-            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**," +
-                    "Use the join command to summon me");
-        }
-        if (!playerManager.authorInVoice(inputMessage.getGuild(), author)) {
+
+        if (!playerManager.authorInVoice(inputMessage.getGuild(), author))
             return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
-        }
+
+        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author))
+            return Templates.command.x_mark.formatFull("**I am currently not connected to your voice channel**," +
+                    "Use the join command to summon me");
+
         if (args.length > 0) {
             if (Integer.parseInt(args[0]) > 1) {
                 return playerManager.skipTrack(args[0]);

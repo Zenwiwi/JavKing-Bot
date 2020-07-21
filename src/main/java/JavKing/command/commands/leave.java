@@ -32,13 +32,14 @@ public class leave extends AbstractCommand {
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         Guild guild = ((TextChannel) channel).getGuild();
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(guild, bot);
-        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author)) {
-            return Templates.command.x_mark.formatFull("**I am currently not connected to a voice channel**, " +
-                    "Use the join command to summon me");
-        }
-        if (!playerManager.authorInVoice(inputMessage.getGuild(), author)) {
+
+        if (!playerManager.authorInVoice(inputMessage.getGuild(), author))
             return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
-        }
+
+        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author))
+            return Templates.command.x_mark.formatFull("**I am currently not connected to your voice channel**, " +
+                    "Use the join command to summon me");
+
         playerManager.leave();
         return Templates.command.check_mark.formatFull("**Successfully left voice channel!**");
     }

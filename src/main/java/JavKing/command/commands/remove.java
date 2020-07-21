@@ -39,6 +39,16 @@ public class remove extends AbstractCommand {
     @Override
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         MusicPlayerManager playerManager = MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot);
+
+        if (playerManager.getLinkedQueue().isEmpty())
+            return Templates.command.x_mark.formatFull(Util.surround("No songs in current queue!", "**"));
+
+        if (playerManager.getLinkedQueue().size() == 1)
+            return Templates.command.x_mark.formatFull(Util.surround("No available songs to remove from queue!", "**"));
+
+        String inVoiceCheck = playerManager.inVoice(inputMessage, author);
+        if (inVoiceCheck != null) return inVoiceCheck;
+
         if (args.length >= 1) {
             int pos = Integer.parseInt(args[0]), end = 0, count = 0;
             try {
@@ -52,12 +62,14 @@ public class remove extends AbstractCommand {
                     end = Math.max(pos, end);
                     try {
                         for (Iterator<OMusic> iterator = playerManager.getLinkedQueue().iterator(); iterator.hasNext(); ) {
+                            iterator.next();
                             if (count >= pos && count <= end) {
                                 iterator.remove();
                             }
                             count++;
                         }
                     } catch (IllegalStateException | ConcurrentModificationException e) {
+                        e.printStackTrace();
                         return ErrorTemplate.formatFull(bot, this.getCommand(), channel, author, inputMessage);
                     }
                 } else
@@ -67,8 +79,8 @@ public class remove extends AbstractCommand {
                         : count + "` songs starting from position `" + pos + "`");
                 return Templates.command.blue_check_mark.formatFull(Util.surround(toReturn, "**"));
             } else
-                return Templates.command.x_mark.formatFull("**Song position and/or end position must be between `1` and `" + playerManager.getLinkedQueue().size() + "`**");
+                return Templates.command.x_mark.formatFull("**Song position and/or end position must be between `1` and `" + (playerManager.getLinkedQueue().size() - 1) + "`**");
         } else
-            return Templates.command.x_mark.formatFull("**Song position must be between `1` and `" + playerManager.getLinkedQueue().size() + "`**");
+            return Templates.command.x_mark.formatFull("**Song position must be between `1` and `" + (playerManager.getLinkedQueue().size() - 1) + "`**");
     }
 }

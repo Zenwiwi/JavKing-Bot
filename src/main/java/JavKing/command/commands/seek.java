@@ -37,6 +37,14 @@ public class seek extends AbstractCommand {
     public String execute(DiscordBot bot, String[] args, MessageChannel channel, User author, Message inputMessage) {
         if (args.length > 0) {
             MusicPlayerManager playerManager = MusicPlayerManager.getFor(((TextChannel) channel).getGuild(), bot);
+
+            if (!playerManager.authorInVoice(inputMessage.getGuild(), author))
+                return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
+
+            if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author))
+                return Templates.command.x_mark.formatFull("**I am currently not connected to your voice channel**," +
+                        "Use the join command to summon me");
+
             OMusic music = playerManager.getLinkedQueue().get(0);
             long maxSeekTo = music.duration;
             long seekTo = String.join(" ", args).contains(":") ? TimeUtil.HHMMSStoSeconds(String.join(" ", args)) : Long.parseLong(args[0]);

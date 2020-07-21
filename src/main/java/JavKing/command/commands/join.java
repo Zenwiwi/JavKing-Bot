@@ -36,9 +36,9 @@ public class join extends AbstractCommand {
 
         if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author)) {
             VoiceChannel vc = inputMessage.getGuild().getMember(author).getVoiceState().getChannel();
-            if (vc == null) {
+            if (vc == null)
                 return Templates.command.x_mark.formatFull("**You must be in a voice channel first!**");
-            }
+
 
             String perms = DisUtil.discordBotPermsVOICE(vc, new Permission[]{Permission.VOICE_SPEAK, Permission.VOICE_CONNECT}) +
                     DisUtil.discordBotPermsCHANNEL(channel, new Permission[]{Permission.MESSAGE_WRITE});

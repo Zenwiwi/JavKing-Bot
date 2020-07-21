@@ -36,7 +36,7 @@ public class queue extends AbstractCommand {
 
     @Override
     public String[] getAlias() {
-        return new String[0];
+        return new String[]{"q"};
     }
 
     @Override
@@ -49,7 +49,6 @@ public class queue extends AbstractCommand {
         List<OMusic> queue = musicPlayerManager.getLinkedQueue();
         if (queue.isEmpty())
             return Templates.command.x_mark.formatFull(Util.surround("No songs in current queue!", "**"));
-
 
         int index = args.length == 0 ? 1 : Integer.parseInt(args[0]);
         int items = 10;

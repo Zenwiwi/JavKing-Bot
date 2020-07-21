@@ -40,6 +40,13 @@ public class clear extends AbstractCommand {
         if (playerManager.getLinkedQueue().size() == 0)
             return Templates.command.x_mark.formatFull(Util.surround("No songs in current queue!", "**"));
 
+        if (!playerManager.authorInVoice(inputMessage.getGuild(), author))
+            return Templates.command.x_mark.formatFull("**You must be in a voice channel to use this command!**");
+
+        if (!playerManager.isInVoiceWith(inputMessage.getGuild(), author))
+            return Templates.command.x_mark.formatFull("**I am currently not connected to your voice channel**," +
+                    "Use the join command to summon me");
+
         LinkedList<OMusic> newLinkedQueue = new LinkedList<>();
         OMusic nowPlaying = playerManager.getLinkedQueue().get(0);
 

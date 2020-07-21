@@ -220,6 +220,25 @@ public class MusicPlayerManager {
         }
     }
 
+    public synchronized String inVoice(Message message, User author) {
+        if (!isInVoiceWith(message.getGuild(), author) && !getLinkedQueue().isEmpty()) {
+            VoiceChannel vc = Objects
+                    .requireNonNull(
+                            Objects.requireNonNull(message.getGuild().getMember(author)).getVoiceState())
+                    .getChannel();
+            if (vc == null) {
+                return Templates.command.x_mark.formatFull("**You must be in a voice channel first!**");
+            }
+            try {
+                if (isConnected()) leave();
+                connectTo(vc);
+            } catch (Exception e) {
+                return Templates.command.x_mark.formatFull("**Can't connect to voice channel, please try again!**");
+            }
+        }
+        return null;
+    }
+
     public boolean leave() {
         if (!queue.isEmpty()) {
             totTimeSeconds = 0;
@@ -457,7 +476,6 @@ public class MusicPlayerManager {
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
 //            stopTimer();
         }
-
 
 
         public void skipTrack() {
