@@ -373,7 +373,7 @@ public class MusicPlayerManager {
     }
 
     public void trackEnded() {
-        if (queue.isEmpty()) {
+        if (queue.isEmpty() || getUsersInVoiceChannel().size() < 1) {
             player.destroy();
             return;
         }

@@ -56,7 +56,7 @@ public class remove extends AbstractCommand {
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
             }
             if (pos > 0 && pos < playerManager.getLinkedQueue().size()) {
-                String firstSong = playerManager.getLinkedQueue().get(1).title;
+                String firstSong = playerManager.getLinkedQueue().get(pos).title;
                 if (end != 0 && end < playerManager.getLinkedQueue().size()) {
                     pos = Math.min(pos, end);
                     end = Math.max(pos, end);
