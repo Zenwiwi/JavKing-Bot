@@ -1,1 +1,1 @@
-worker: java -jar JavKing.main-1.0-SNAPSHOT-jar-with-dependencies.jar
+worker: java -jar out/artifacts/JavKing_MAVEN_jar/JavKing_MAVEN.jar
