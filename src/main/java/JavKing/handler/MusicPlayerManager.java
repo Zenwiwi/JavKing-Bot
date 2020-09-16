@@ -488,33 +488,8 @@ public class MusicPlayerManager {
             AudioTrack poll = queue.poll();
             if (poll != null) {
                 player.startTrack(poll, false);
-            } else {
-//                startTimer();
             }
         }
-
-//        public void startTimer() {
-//            timer = new Timer();
-//            interval = 240000;
-//            timer.scheduleAtFixedRate(new TimerTask() {
-//
-//                public void run() {
-//                    countdownTimer();
-//                }
-//            }, 1000, interval);
-//        }
-//
-//        private long countdownTimer() {
-//            if (interval == 1) {
-//                player.destroy();
-//                timer.cancel();
-//            }
-//            return --interval;
-//        }
-//
-//        public void stopTimer() {
-//            timer.cancel();
-//        }
 
         @Override
         public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
@@ -529,6 +504,11 @@ public class MusicPlayerManager {
                 totTimeSeconds -= track.getDuration();
                 skipTrack();
             }
+        }
+
+        @Override
+        public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+            skipTrack();
         }
     }
 }
