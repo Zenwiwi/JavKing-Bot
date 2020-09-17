@@ -13,17 +13,17 @@ import java.nio.ByteBuffer;
  */
 public class AudioPlayerSendHandler implements AudioSendHandler {
     private final AudioPlayer audioPlayer;
-    private final ByteBuffer buffer;
+//    private final ByteBuffer buffer;
 //    private final MutableAudioFrame frame;
 
-    private AudioFrame lastFrame;
+    private static AudioFrame lastFrame;
 
     /**
      * @param audioPlayer Audio player to wrap.
      */
     public AudioPlayerSendHandler(AudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;
-        this.buffer = ByteBuffer.allocate(920 * 2 * 2);
+//        this.buffer = ByteBuffer.allocate(1024);
 //        this.frame = new MutableAudioFrame();
 //        this.frame.setBuffer(buffer);
     }
@@ -32,7 +32,7 @@ public class AudioPlayerSendHandler implements AudioSendHandler {
     public boolean canProvide() {
         // returns true if audio was provided
         if (lastFrame == null) lastFrame = audioPlayer.provide();
-        System.out.println("lastFrame: " + lastFrame);
+//        System.out.println("lastFrame: " + lastFrame);
         return lastFrame != null;
 //        return audioPlayer.provide(frame);
     }
@@ -42,11 +42,10 @@ public class AudioPlayerSendHandler implements AudioSendHandler {
         // flip to make it a read buffer
 //        ((Buffer) buffer).flip();
 //        return buffer;
-//        buffer.wait(5_000);
         if (lastFrame == null) lastFrame = audioPlayer.provide();
         byte[] data = lastFrame != null ? lastFrame.getData() : null;
         lastFrame = null;
-        System.out.println("data: " + data);
+//        System.out.println("data: " + data);
         return data == null ? null : ByteBuffer.wrap(data);
     }
 

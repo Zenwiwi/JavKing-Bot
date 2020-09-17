@@ -39,7 +39,7 @@ public class BotContainer {
     }
 
     public static void main(String[] args) throws LoginException, InterruptedException, RateLimitedException {
-        new BotContainer(2);
+        BotContainer botContainer = new BotContainer(2);
         System.out.println("      _             _  ___             \n" +
                 "     | | __ ___   _| |/ (_)_ __   __ _ \n" +
                 "  _  | |/ _` \\ \\ / / ' /| | '_ \\ / _` |\n" +
