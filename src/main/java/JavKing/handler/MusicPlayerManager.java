@@ -7,10 +7,7 @@ import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.Templates;
 import JavKing.util.*;
-import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration;
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -34,19 +31,17 @@ import java.util.stream.Collectors;
 public class MusicPlayerManager {
     private final static DefaultAudioPlayerManager playerManager = new DefaultAudioPlayerManager();
     private final static Map<Long, MusicPlayerManager> musicManagers = new ConcurrentHashMap<>();
-    public final AudioPlayer player;
     private final TrackScheduler scheduler;
     private final long guildId;
     private final DiscordBot bot;
     private volatile boolean inRepeatMode = false;
-    // private volatile int currentSongLength = 0;
     private volatile int currentlyPlaying = 0;
-    private volatile long currentSongStartTimeInSeconds = 0;
+    private volatile int currentSongStartTimeInSeconds = 0;
     private volatile long pauseStart = 0;
     private long totTimeSeconds = 0;
     private volatile LinkedList<OMusic> queue;
-    // private volatile int queueLength = 0;
-    // private YTSearch ytSearch;
+
+    public final AudioPlayer player;
 
     public MusicPlayerManager(Guild guild, DiscordBot bot) {
         this.bot = bot;
@@ -63,7 +58,7 @@ public class MusicPlayerManager {
         init();
     }
 
-    public static void init() {
+    private static void init() {
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioSourceManagers.registerLocalSource(playerManager);
         playerManager.getConfiguration().setResamplingQuality(AudioConfiguration.ResamplingQuality.HIGH);
@@ -94,9 +89,9 @@ public class MusicPlayerManager {
         player.getPlayingTrack().setPosition(millis);
     }
 
-    public long getGuild() {
-        return guildId;
-    }
+    // public long getGuild() {
+    // return guildId;
+    // }
 
     public synchronized Object playSendYTSCMessage(OMusic music, @Nullable User author, @Nullable String hex,
                                                    boolean bool) {
@@ -110,7 +105,8 @@ public class MusicPlayerManager {
                             TimeUtil.millisecondsToHHMMSS(totTimeSeconds - queue.get(queue.size() - 1).duration), true)
                     .addField("Position In Queue", String.valueOf(queue.size() - 1), true)
                     .setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
-            if (author != null) embed.setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl());
+            if (author != null)
+                embed.setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl());
             return embed;
         } else {
             return Templates.music.playing_now.formatFull("**Playing** :notes: `" + music.title + "` - Now!");
@@ -167,7 +163,7 @@ public class MusicPlayerManager {
         return true;
     }
 
-    public List<Member> getUsersInVoiceChannel() {
+    public synchronized java.util.List<Member> getUsersInVoiceChannel() {
         ArrayList<Member> userList = new ArrayList<>();
         VoiceChannel currentChannel = bot.getJDA().getGuildById(guildId).getAudioManager().getConnectedChannel();
         if (currentChannel != null) {
@@ -197,27 +193,10 @@ public class MusicPlayerManager {
     }
 
     public synchronized void playCheckVoice(Message message, User author) {
-        if (!isInVoiceWith(message.getGuild(), author) && !getLinkedQueue().isEmpty()) {
-            VoiceChannel vc = Objects
-                    .requireNonNull(
-                            Objects.requireNonNull(message.getGuild().getMember(author)).getVoiceState())
-                    .getChannel();
-            if (vc == null) {
-                Util.sendMessage(
-                        Templates.command.x_mark.formatFull("**You must be in a voice channel first!**"),
-                        message);
-                return;
-            }
-            try {
-                if (isConnected()) leave();
-                connectTo(vc);
-            } catch (Exception e) {
-                Util.sendMessage(Templates.command.x_mark
-                        .formatFull("**Can't connect to voice channel, please try again!**"), message);
-                return;
-            }
+        String inVoiceCheck = inVoice(message, author);
+        if (inVoiceCheck == null) {
             startPlaying();
-        }
+        } else Util.sendMessage(inVoiceCheck, message);
     }
 
     public synchronized String inVoice(Message message, User author) {
@@ -237,27 +216,6 @@ public class MusicPlayerManager {
             }
         }
         return null;
-    }
-
-    public boolean leave() {
-        if (!queue.isEmpty()) {
-            totTimeSeconds = 0;
-            queue.clear();
-        }
-        if (isConnected())
-            stopMusic();
-
-        Guild guild = bot.getJDA().getGuildById(guildId);
-        if (guild != null)
-            guild.getAudioManager().closeAudioConnection();
-
-        if (inRepeatMode)
-            setRepeat(!inRepeatMode);
-        return true;
-    }
-
-    public synchronized void stopMusic() {
-        player.destroy();
     }
 
     public boolean isInVoiceWith(Guild guild, User author) {
@@ -284,6 +242,27 @@ public class MusicPlayerManager {
         }
     }
 
+    public boolean leave() {
+        if (!queue.isEmpty()) {
+            totTimeSeconds = 0;
+            queue.clear();
+        }
+        if (isConnected())
+            stopMusic();
+
+        Guild guild = bot.getJDA().getGuildById(guildId);
+        if (guild != null)
+            guild.getAudioManager().closeAudioConnection();
+
+        if (inRepeatMode)
+            setRepeat(!inRepeatMode);
+        return true;
+    }
+
+    public synchronized void stopMusic() {
+        player.destroy();
+    }
+
     public synchronized boolean isInRepeatMode() {
         return inRepeatMode;
     }
@@ -307,85 +286,75 @@ public class MusicPlayerManager {
     }
 
     public synchronized void playlistAdd(String uri, User author, Message message) {
-        playerManager.loadItemOrdered(player, uri, new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-            }
-
-            @Override
-            public void playlistLoaded(AudioPlaylist playlist) {
-                int count = 0;
-                try {
-                    for (AudioTrack track : playlist.getTracks()) {
-                        OMusic music = new OMusic();
-                        music.title = track.getInfo().title;
-                        music.id = track.getSourceManager().getSourceName().equals("youtube") ? track.getIdentifier()
-                                : track.getInfo().uri;
-                        music.requestedBy = author.getAsTag();
-                        music.uri = track.getInfo().uri;
-                        music.author = track.getInfo().author;
-                        music.duration = track.getDuration();
-                        if (count == 0) {
-                            music.thumbnail = Util.resolveThumbnail(track, message);
-                            LPUtil.updateLPURI(SCUtil.SCisURI(music.uri) ? uri : YTUtil.getPlaylistCode(uri), uri,
-                                    playlist.getName(), music.thumbnail, message.getGuild().getId());
-                        }
-                        addToQueue(music);
-                        if (count++ == 0) {
-                            if (BotContainer.mongoDbAdapter.loadGuild(message.getTextChannel()).announceSongs
-                                    .equalsIgnoreCase("on")) {
-                                Object toSend = playSendYTSCMessage(
-                                        queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
-                                        (track.getSourceManager().getSourceName().equals("youtube")
-                                                ? BotContainer.getDotenv("YOUTUBE")
-                                                : BotContainer.getDotenv("SOUNDCLOUD")),
-                                        false);
-                                if (toSend instanceof EmbedBuilder) {
-                                    Util.sendMessage(toSend,
-                                            BotContainer.mongoDbAdapter.loadGuild(message.getGuild()).channelId, bot);
-                                }
-                            } else {
-                                Util.sendMessage(playSendYTSCMessage(
-                                        queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
-                                        (track.getSourceManager().getSourceName().equals("youtube")
-                                                ? BotContainer.getDotenv("YOUTUBE")
-                                                : BotContainer.getDotenv("SOUNDCLOUD")),
-                                        true), message);
-                            }
-                        }
-                    }
-                } catch (Exception ignored) {
+        if (YTUtil.getPlaylistCode(uri) != null) {
+            new YTSearch().resolvePlaylist(this, uri, author, message);
+        } else {
+            playerManager.loadItemOrdered(player, uri, new AudioLoadResultHandler() {
+                @Override
+                public void trackLoaded(AudioTrack audioTrack) {
 
                 }
-                playCheckVoice(message, author);
-            }
 
-            @Override
-            public void noMatches() {
+                @Override
+                public synchronized void playlistLoaded(AudioPlaylist playlist) {
+                    int count = 0;
+                    try {
+                        for (AudioTrack track : playlist.getTracks()) {
+                            OMusic music = new OMusic();
+                            music.title = track.getInfo().title;
+                            music.id = track.getInfo().uri;
+                            music.requestedBy = author.getAsTag();
+                            music.uri = track.getInfo().uri;
+                            music.author = track.getInfo().author;
+                            music.duration = track.getDuration();
+                            if (count == 0) {
+                                music.thumbnail = Util.resolveThumbnail(track, message);
+                                LPUtil.updateLPURI(SCUtil.SCisURI(music.uri) ? uri : YTUtil.getPlaylistCode(uri), uri,
+                                        playlist.getName(), music.thumbnail, message.getGuild().getId());
+                            }
+                            addToQueue(music);
+                            if (count++ == 0) {
+                                Util.sendMessage(playSendYTSCMessage(
+                                        queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
+                                        (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD")),
+                                        false),
+                                        BotContainer.mongoDbAdapter.loadGuild(message.getGuild()).channelId, bot);
 
-            }
+                            }
+                        }
+                    } catch (Exception e) {
+                        Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("Unable to load SoundCloud playlist: " + e.getMessage(), "**")), message);
+                    }
+                    playCheckVoice(message, author);
+                }
 
-            @Override
-            public void loadFailed(FriendlyException ignored) {
-                Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("Error in audio playback! `ID: " + YTUtil.getPlaylistCode(uri) + "`", "**")), message);
-            }
-        });
+                @Override
+                public void noMatches() {
+                    Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("No playlist found for: " + uri, "**")), message);
+                }
+
+                @Override
+                public void loadFailed(FriendlyException e) {
+                    Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("Unable to load playlist: " + e.getMessage(), "**")), message);
+                }
+            });
+        }
     }
 
-    public void trackEnded() {
-        if (queue.isEmpty() || getUsersInVoiceChannel().size() < 1) {
+    public synchronized void trackEnded() {
+        if (queue.isEmpty() /*|| getUsersInVoiceChannel().size() < 1*/) {
             player.destroy();
             return;
         }
         final OMusic trackToAdd = queue.get(0);
         if (trackToAdd == null) return;
+        OGuild guild = BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId));
 
         playerManager.loadItemOrdered(player, Util.idOrURI(trackToAdd), new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 scheduler.queue(track);
                 startPlaying();
-                OGuild guild = BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId));
                 if (guild.announceSongs.equalsIgnoreCase("on")) {
                     Util.sendMessage(playSendYTSCMessage(trackToAdd, null, null, false),
                             guild.channelId, bot);
@@ -399,6 +368,7 @@ public class MusicPlayerManager {
 
             @Override
             public void noMatches() {
+                Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("No matches found!", "**")), guild.channelId, bot);
 
             }
 
@@ -411,9 +381,6 @@ public class MusicPlayerManager {
 
     public void queuePoll() {
         queue.poll();
-    }
-
-    public void trackStarted() {
     }
 
     public synchronized String skipTrack(@Nullable String toIndex) {

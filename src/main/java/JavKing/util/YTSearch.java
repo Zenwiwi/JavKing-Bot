@@ -1,15 +1,21 @@
 package JavKing.util;
 
 import JavKing.command.model.OMusic;
+import JavKing.handler.MusicPlayerManager;
 import JavKing.main.BotContainer;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.common.base.Joiner;
+import com.sedmelluq.discord.lavaplayer.track.AudioItem;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.LinkedList;
 import java.util.List;
 
 public class YTSearch {
@@ -76,5 +82,31 @@ public class YTSearch {
             BotContainer.mongoDbAdapter.updateMusic("videoId", Util.musicKeys(), Util.oMusicArray(music));
         }
         return music;
+    }
+
+    public synchronized void resolvePlaylist(MusicPlayerManager musicPlayerManager, String uri, User author, Message message) {
+//        System.out.println(uri);
+        AudioPlaylist items = new YTPLSearch().playlist(YTUtil.getPlaylistCode(uri), null);
+        int index = 0;
+        for (AudioItem item : items.getTracks()) {
+            AudioTrack track = (AudioTrack) item;
+            OMusic music = new OMusic();
+            music.id = track.getIdentifier();
+            music.thumbnail = "https://i.ytimg.com/vi/" + music.id + "/hqdefault.jpg";
+            music.duration = track.getDuration();
+            music.requestedBy = author.getAsTag();
+            music.title = track.getInfo().title;
+            music.uri = track.getInfo().uri;
+            music.author = track.getInfo().author;
+            musicPlayerManager.addToQueue(music);
+            if (index == 0) {
+                index++;
+                LinkedList<OMusic> lqueue = musicPlayerManager.getLinkedQueue();
+                Util.sendMessage(musicPlayerManager.playSendYTSCMessage(lqueue.get(lqueue.size() - 1), author, BotContainer.getDotenv("YOUTUBE"), true), message);
+                LPUtil.updateLPURI(YTUtil.getPlaylistCode(uri), uri,
+                        items.getName(), lqueue.get(lqueue.size() - 1).thumbnail, message.getGuild().getId());
+            }
+        }
+        musicPlayerManager.playCheckVoice(message, author);
     }
 }
