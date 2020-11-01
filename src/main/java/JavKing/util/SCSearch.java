@@ -26,40 +26,48 @@ public class SCSearch {
 
     private synchronized void searchSC(Message message, String uri, User author, @Nullable String thumbnail, MusicPlayerManager playerManager) {
         OMusic music = new OMusic();
-        playerManager.getDefaultAudioPlayerManager().loadItemOrdered(playerManager.getAudioPlayer(), uri, new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                music.duration = track.getDuration();
-                music.author = track.getInfo().author;
-                music.uri = uri;
-                music.id = track.getIdentifier();
-                music.requestedBy = author.getAsTag();
-                music.title = track.getInfo().title;
-                music.thumbnail = thumbnail;
-                BotContainer.mongoDbAdapter.updateMusic("SCvideoId", Util.musicKeys(), Util.oMusicArray(music));
+        try {
+            System.out.println(uri);
+            Thread.sleep(2000);
 
-                LPUtil.updateLPURI(music.id, music.uri, music.title, music.thumbnail, message.getGuild().getId());
-                playerManager.getLinkedQueue().offer(music);
-                Util.sendMessage(playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("SOUNDCLOUD"), true), message);
-                playerManager.updateTotTimeSeconds(music.duration);
+            playerManager.getDefaultAudioPlayerManager().loadItemOrdered(playerManager.getAudioPlayer(), uri, new AudioLoadResultHandler() {
+                @Override
+                public synchronized void trackLoaded(AudioTrack track) {
+                    music.duration = track.getDuration();
+                    music.author = track.getInfo().author;
+                    music.uri = uri;
+                    music.id = track.getIdentifier();
+                    music.requestedBy = author.getAsTag();
+                    music.title = track.getInfo().title;
+                    music.thumbnail = thumbnail;
+                    System.out.println(music.title);
+                    BotContainer.mongoDbAdapter.updateMusic("SCvideoId", Util.musicKeys(), Util.oMusicArray(music));
 
-                playerManager.playCheckVoice(message, author);
-            }
+                    LPUtil.updateLPURI(music.id, music.uri, music.title, music.thumbnail, message.getGuild().getId());
+                    playerManager.addToQueue(music);
+                    Util.sendMessage(playerManager.playSendYTSCMessage(music, author, BotContainer.getDotenv("SOUNDCLOUD"), true), message);
+                    playerManager.updateTotTimeSeconds(music.duration);
 
-            @Override
-            public void playlistLoaded(AudioPlaylist playlist) {
-            }
+                    playerManager.playCheckVoice(message, author);
+                }
 
-            @Override
-            public void noMatches() {
+                @Override
+                public void playlistLoaded(AudioPlaylist playlist) {
+                }
 
-            }
+                @Override
+                public void noMatches() {
+                    System.out.println(":c");
+                }
 
-            @Override
-            public void loadFailed(FriendlyException exception) {
+                @Override
+                public void loadFailed(FriendlyException exception) {
+                    System.out.println(exception.getMessage());
+                }
+            });
+        } catch (InterruptedException ignored) {
 
-            }
-        });
+        }
     }
 
     public void resolveSCVideoParameters(String[] args, User author, Message message, MusicPlayerManager playerManager) {
@@ -68,6 +76,7 @@ public class SCSearch {
 
     private synchronized void resolveSCVideoParameters(String id, User author, Message message, MusicPlayerManager playerManager) {
         OMusic music = BotContainer.mongoDbAdapter.loadMusic(id, author);
+        System.out.println(music);
         if (music == null) {
             String thumbnailURI;
             while (true) {
@@ -82,6 +91,7 @@ public class SCSearch {
             }
             searchSC(message, id, author, thumbnailURI, playerManager);
         } else {
+            System.out.println(music.title + "x");
             playerManager.addToQueue(music);
             playerManager.playCheckVoice(message, author);
         }
