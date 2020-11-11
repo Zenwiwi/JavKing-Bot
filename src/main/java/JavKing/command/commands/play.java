@@ -63,6 +63,7 @@ public class play extends AbstractCommand {
 
             if (YTUtil.isPlaylistCode(args[0])) {
                 playerManager.playlistAdd(args[0], author, inputMessage);
+                return null;
             } else if (SCUtil.SCisURI(args[0])) {
                 try {
                     playerManager.addSCToQueue(args, author, inputMessage, playerManager);
