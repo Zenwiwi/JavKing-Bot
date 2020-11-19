@@ -103,7 +103,7 @@ public class YTSearch {
                 index++;
                 LinkedList<OMusic> lqueue = musicPlayerManager.getLinkedQueue();
                 Util.sendMessage(musicPlayerManager.playSendYTSCMessage(lqueue.get(lqueue.size() - 1), author, BotContainer.getDotenv("YOUTUBE"), true), message);
-                LPUtil.updateLPURI(YTUtil.getPlaylistCode(uri), uri,
+                LPUtil.updateLPURI(YTUtil.getPlaylistCode(uri), "www.youtube.com/playlist?list=" + YTUtil.getPlaylistCode(uri),
                         items.getName(), lqueue.get(lqueue.size() - 1).thumbnail, message.getGuild().getId());
             }
         }
