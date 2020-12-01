@@ -86,7 +86,8 @@ public class YTSearch {
 
     public synchronized void resolvePlaylist(MusicPlayerManager musicPlayerManager, String uri, User author, Message message) {
 //        System.out.println(uri);
-        AudioPlaylist items = new YTPLSearch().playlist(YTUtil.getPlaylistCode(uri), null);
+        String plId = YTUtil.getPlaylistCode(uri);
+        AudioPlaylist items = new YTPLSearch().playlist(plId, null);
         int index = 0;
         for (AudioItem item : items.getTracks()) {
             AudioTrack track = (AudioTrack) item;
@@ -103,7 +104,7 @@ public class YTSearch {
                 index++;
                 LinkedList<OMusic> lqueue = musicPlayerManager.getLinkedQueue();
                 Util.sendMessage(musicPlayerManager.playSendYTSCMessage(lqueue.get(lqueue.size() - 1), author, BotContainer.getDotenv("YOUTUBE"), true), message);
-                LPUtil.updateLPURI(YTUtil.getPlaylistCode(uri), "www.youtube.com/playlist?list=" + YTUtil.getPlaylistCode(uri),
+                LPUtil.updateLPURI(plId, "https://www.youtube.com/playlist?list=" + plId,
                         items.getName(), lqueue.get(lqueue.size() - 1).thumbnail, message.getGuild().getId());
             }
         }

@@ -1,1 +1,1 @@
-worker: java -jar out/artifacts/JavKing_MAVEN_jar/JavKing.main.jar
+worker: java -jar out/artifacts/JavKing_main_jar/JavKing.main.jar
