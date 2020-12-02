@@ -272,8 +272,7 @@ public class MusicPlayerManager {
     }
 
     public synchronized void addToQueue(OMusic music) {
-        queue.offer(music);
-        totTimeSeconds += music.duration;
+        if (queue.offer(music)) totTimeSeconds += music.duration;
     }
 
     public synchronized void addSCToQueue(String[] args, User author, Message message,
@@ -398,7 +397,7 @@ public class MusicPlayerManager {
         totTimeSeconds -= duration;
         scheduler.skipTrack();
         if (finalInRepeatMode) setRepeat(true);
-        return toIndex != null && Integer.parseInt(toIndex) > 1 ? Templates.music.skipped_song.formatFull("***Skipped to*** `" + getLinkedQueue().get(0).title + "`")
+        return toIndex != null && Integer.parseInt(toIndex) > 1 ? Templates.music.skipped_song.formatFull("***Skipped to*** " + Util.surround(getLinkedQueue().get(0).title, "`"))
                 : Templates.music.skipped_song.formatFull("***Skipped!***");
     }
 

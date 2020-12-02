@@ -19,7 +19,6 @@ public class LPUtil {
                 new SCSearch().resolveSCURI(id, author, message, playerManager);
             } else if (YTUtil.isPlaylistCode(uri)) {
                 playerManager.playlistAdd(uri, author, message);
-                return null;
             } else if (YTUtil.isVideoCode(uri)) {
                 OMusic search = new YTSearch().resolveVideoParameters(uri, author);
                 play.processTrack(search, playerManager);

@@ -59,7 +59,7 @@ public class play extends AbstractCommand {
 
         Object toSend = null;
         if (args.length > 0) {
-            channel.sendMessage("<:YT:605943277706936324> **Searching for **\uD83D\uDD0E `" + Joiner.on(" ").join(args) + "`").queue();
+            channel.sendMessage("<:YT:605943277706936324> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
 
             if (YTUtil.isPlaylistCode(args[0])) {
                 playerManager.playlistAdd(args[0], author, inputMessage);
