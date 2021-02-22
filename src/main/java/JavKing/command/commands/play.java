@@ -8,6 +8,10 @@ import JavKing.main.DiscordBot;
 import JavKing.templates.ErrorTemplate;
 import JavKing.templates.Templates;
 import JavKing.util.*;
+import JavKing.util.SC.SCUri;
+import JavKing.util.SP.SPUri;
+import JavKing.util.YT.YTSearch;
+import JavKing.util.YT.YTUri;
 import com.google.common.base.Joiner;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -59,19 +63,28 @@ public class play extends AbstractCommand {
 
         Object toSend = null;
         if (args.length > 0) {
-            channel.sendMessage("<:YT:605943277706936324> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
-
-            if (YTUtil.isPlaylistCode(args[0])) {
+            if (YTUri.isPlaylistCode(args[0])) {
+                channel.sendMessage("<:youtube:797267941824659486> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
                 playerManager.playlistAdd(args[0], author, inputMessage);
                 return null;
-            } else if (SCUtil.SCisURI(args[0])) {
+            } else if (SCUri.SCisURI(args[0])) {
+                channel.sendMessage("<:soundcloud:782829150670553119> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
                 try {
-                    playerManager.addSCToQueue(args, author, inputMessage, playerManager);
+                    playerManager.addSCToQueue(args, author, inputMessage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return Templates.command.x_mark.formatFull("**Unable to load playlist/track(s)**");
+                }
+            } else if (SPUri.SPisURI(args[0])) {
+                channel.sendMessage("<:spotify:811735540604862484> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
+                try {
+                    playerManager.addSPToQueue(args[0], author, inputMessage);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return Templates.command.x_mark.formatFull("**Unable to load playlist/track(s)**");
                 }
             } else if (Joiner.on(" ").join(args).equalsIgnoreCase("lastplayed")) {
+                channel.sendMessage("<:akariangry:811738629658378262> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
                 try {
                     toSend = playerManager.addLastPlayedToQueue(author, inputMessage);
                 } catch (Exception e) {
@@ -79,6 +92,7 @@ public class play extends AbstractCommand {
                     return Templates.command.x_mark.formatFull("**Unable to load playlist/track(s)**");
                 }
             } else {
+                channel.sendMessage("<:youtube:797267941824659486> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
                 try {
                     OMusic music = ytSearch.searchVideo(args, author);
                     if (music != null) {

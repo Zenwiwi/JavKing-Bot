@@ -6,8 +6,18 @@ import JavKing.handler.audio.AudioPlayerSendHandler;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.Templates;
-import JavKing.util.*;
-import com.sedmelluq.discord.lavaplayer.player.*;
+import JavKing.util.LPUtil;
+import JavKing.util.SC.SCSearch;
+import JavKing.util.SC.SCUri;
+import JavKing.util.SP.SPSearch;
+import JavKing.util.TimeUtil;
+import JavKing.util.Util;
+import JavKing.util.YT.YTSearch;
+import JavKing.util.YT.YTUri;
+import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration;
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -20,7 +30,6 @@ import net.dv8tion.jda.api.managers.AudioManager;
 
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -40,6 +49,7 @@ public class MusicPlayerManager {
     private volatile long pauseStart = 0;
     private long totTimeSeconds = 0;
     private volatile LinkedList<OMusic> queue;
+    private List<OMusic> tempQueue;
 
     public final AudioPlayer player;
 
@@ -50,6 +60,7 @@ public class MusicPlayerManager {
         player = playerManager.createPlayer();
         scheduler = new TrackScheduler(player);
         queue = new LinkedList<>();
+        tempQueue = new ArrayList<>();
         // ytSearch = new YTSearch();
         AudioManager guildManager = guild.getAudioManager();
         guildManager.setSendingHandler(new AudioPlayerSendHandler(player));
@@ -89,6 +100,10 @@ public class MusicPlayerManager {
         player.getPlayingTrack().setPosition(millis);
     }
 
+    public long getTime() {
+        return player.getPlayingTrack().getPosition();
+    }
+
     // public long getGuild() {
     // return guildId;
     // }
@@ -106,7 +121,8 @@ public class MusicPlayerManager {
                     .addField("Position In Queue", String.valueOf(queue.size() - 1), true)
                     .setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
             if (author != null)
-                embed.setAuthor("Added to Queue!", null, author.getEffectiveAvatarUrl());
+                embed.setAuthor("Added to Queue!",
+                        null, author.getEffectiveAvatarUrl());
             return embed;
         } else {
             return Templates.music.playing_now.formatFull("**Playing** :notes: `" + music.title + "` - Now!");
@@ -275,17 +291,46 @@ public class MusicPlayerManager {
         if (queue.offer(music)) totTimeSeconds += music.duration;
     }
 
-    public synchronized void addSCToQueue(String[] args, User author, Message message,
-                                          MusicPlayerManager playerManager) {
-        new SCSearch().resolveSCURI(args, author, message, playerManager);
+//    public void addToTempQueue(OMusic music) {
+//        tempQueue.add(music);
+//    }
+//
+//    public void sortTempQueue() {
+//        int interval = 0, limit = 8;
+//        LinkedList<OMusic> currentQueue = getLinkedQueue();
+//        List<OMusic> currentTempQueue = tempQueue;
+//        while (interval <= 8) {
+//            for (OMusic music : tempQueue) {
+//                if (music.index == interval) {
+//                    currentQueue.offer(music);
+//                    currentTempQueue.remove(music);
+//                    totTimeSeconds += music.duration;
+//                    limit--;
+//                }
+//                if (limit == 0) {
+//                    interval++;
+//                    limit = 8;
+//                }
+//            }
+//        }
+//        tempQueue = new ArrayList<>();
+//        replaceLinkedQueue(currentQueue);
+//    }
+
+    public synchronized void addSCToQueue(String[] args, User author, Message message) {
+        SCSearch.resolveSCURI(args, author, message, this);
     }
 
-    public synchronized Object addLastPlayedToQueue(User author, Message message) throws IOException {
+    public synchronized void addSPToQueue(String args, User author, Message message) throws Exception {
+        SPSearch.resolveSPURI(args, author, message, this);
+    }
+
+    public synchronized Object addLastPlayedToQueue(User author, Message message) throws Exception {
         return LPUtil.resolveLPURI(author, message, this);
     }
 
     public synchronized void playlistAdd(String uri, User author, Message message) {
-        if (YTUtil.getPlaylistCode(uri) != null) {
+        if (YTUri.getPlaylistCode(uri) != null) {
             new YTSearch().resolvePlaylist(this, uri, author, message);
         } else {
             playerManager.loadItemOrdered(player, uri, new AudioLoadResultHandler() {
@@ -308,17 +353,17 @@ public class MusicPlayerManager {
                             music.duration = track.getDuration();
                             if (count == 0) {
                                 music.thumbnail = Util.resolveThumbnail(track, message);
-                                LPUtil.updateLPURI(SCUtil.SCisURI(music.uri) ? uri : YTUtil.getPlaylistCode(uri), uri,
+                                LPUtil.updateLPURI(SCUri.SCisURI(music.uri) ? uri : YTUri.getPlaylistCode(uri), uri,
                                         playlist.getName(), music.thumbnail, message.getGuild().getId());
                             }
                             addToQueue(music);
                             if (count++ == 0) {
-                                Util.sendMessage(playSendYTSCMessage(
-                                        queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
-                                        (track.getSourceManager().getSourceName().equals("youtube") ? BotContainer.getDotenv("YOUTUBE") : BotContainer.getDotenv("SOUNDCLOUD")),
-                                        false),
-                                        BotContainer.mongoDbAdapter.loadGuild(message.getGuild()).channelId, bot);
-
+                                if (track.getSourceManager().getSourceName().equalsIgnoreCase("youtube")) {
+                                    Util.sendMessage(playSendYTSCMessage(
+                                            queue.isEmpty() ? queue.get(0) : queue.get(queue.size() - 1), author,
+                                            BotContainer.getDotenv("YOUTUBE"), false),
+                                            BotContainer.mongoDbAdapter.loadGuild(message.getGuild()).channelId, bot);
+                                }
                             }
                         }
                     } catch (Exception e) {
@@ -348,7 +393,18 @@ public class MusicPlayerManager {
         final OMusic trackToAdd = queue.get(0);
         if (trackToAdd == null) return;
         OGuild guild = BotContainer.mongoDbAdapter.loadGuild(String.valueOf(guildId));
-
+//        System.out.println(trackToAdd.uri);
+//        System.out.println(SPUri.SPisURI(trackToAdd.uri));
+//        if (SPUri.SPisURI(trackToAdd.uri)) {
+//            try {
+//                BotContainer.spUtil.spotifyApi.startResumeUsersPlayback().context_uri(SPUri.parseFromUri(trackToAdd.uri))
+//                        .build().execute();
+//            } catch (ParseException | SpotifyWebApiException | IOException e) {
+//                e.printStackTrace();
+//                Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("No matches foundx!", "**")),
+//                        guild.channelId, bot);
+//            }
+//        } else
         playerManager.loadItemOrdered(player, Util.idOrURI(trackToAdd), new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
@@ -368,7 +424,6 @@ public class MusicPlayerManager {
             @Override
             public void noMatches() {
                 Util.sendMessage(Templates.command.x_mark.formatFull(Util.surround("No matches found!", "**")), guild.channelId, bot);
-
             }
 
             @Override

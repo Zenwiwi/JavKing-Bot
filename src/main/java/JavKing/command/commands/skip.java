@@ -27,7 +27,7 @@ public class skip extends AbstractCommand {
 
     @Override
     public String[] getAlias() {
-        return new String[]{"next"};
+        return new String[]{"next", "sk"};
     }
 
     @Override

@@ -5,6 +5,8 @@ import JavKing.command.model.OMusic;
 import JavKing.main.BotContainer;
 import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
+import JavKing.util.SC.SCUri;
+import JavKing.util.YT.YTSearch;
 import com.mongodb.client.model.Filters;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -29,7 +31,7 @@ public class Util {
     }
 
     public static boolean idOrURI(String uri) {
-        return !SCUtil.SCisURI(uri);
+        return !SCUri.SCisURI(uri);
     }
 
     public static String resolveThumbnail(AudioTrack track, Message message) {

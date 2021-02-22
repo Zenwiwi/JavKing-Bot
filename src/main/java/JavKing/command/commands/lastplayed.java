@@ -6,8 +6,9 @@ import JavKing.main.DiscordBot;
 import JavKing.templates.EmbedTemplate;
 import JavKing.templates.Templates;
 import JavKing.util.DisUtil;
-import JavKing.util.SCUtil;
-import JavKing.util.YTUtil;
+import JavKing.util.SC.SCUri;
+import JavKing.util.SP.SPUri;
+import JavKing.util.YT.YTUri;
 import com.mongodb.client.model.Filters;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -42,7 +43,7 @@ public class lastplayed extends AbstractCommand {
 
         if (doc != null && doc.getString("guildId").equals(inputMessage.getGuild().getId())) {
             String playlist, uri = doc.getString("uri");
-            if (YTUtil.isPlaylistCode(uri) || SCUtil.SCisPlaylistURI(uri)) {
+            if (YTUri.isPlaylistCode(uri) || SCUri.SCisPlaylistURI(uri) || SPUri.SPisPlaylistURI(uri)) {
                 playlist = "Yes";
             } else playlist = "No";
             EmbedBuilder embedTemplate = new EmbedTemplate()
