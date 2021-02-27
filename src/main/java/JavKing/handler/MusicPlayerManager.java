@@ -49,7 +49,7 @@ public class MusicPlayerManager {
     private volatile long pauseStart = 0;
     private long totTimeSeconds = 0;
     private volatile LinkedList<OMusic> queue;
-    private List<OMusic> tempQueue;
+    private volatile LinkedList<OMusic> tempQueue;
 
     public final AudioPlayer player;
 
@@ -60,7 +60,7 @@ public class MusicPlayerManager {
         player = playerManager.createPlayer();
         scheduler = new TrackScheduler(player);
         queue = new LinkedList<>();
-        tempQueue = new ArrayList<>();
+        tempQueue = new LinkedList<>();
         // ytSearch = new YTSearch();
         AudioManager guildManager = guild.getAudioManager();
         guildManager.setSendingHandler(new AudioPlayerSendHandler(player));
@@ -104,6 +104,10 @@ public class MusicPlayerManager {
         return player.getPlayingTrack().getPosition();
     }
 
+    public long getTotTimeSeconds() {
+        return totTimeSeconds;
+    }
+
     // public long getGuild() {
     // return guildId;
     // }
@@ -113,7 +117,8 @@ public class MusicPlayerManager {
         if (queue.size() > 1 && bool) {
             EmbedBuilder embed = Templates.music.added_to_queue.clearEmbed()
                     .setColor(Color.decode(BotContainer.getDotenv("YOUTUBE")))
-                    .setDescription(String.format("[%s](%s)", music.title, music.uri)).setThumbnail(music.thumbnail)
+                    .setDescription(String.format("[%s](%s)", music.title, music.uri))
+                    .setThumbnail(music.thumbnail)
                     .addField("Channel", music.author, true)
                     .addField("Song Duration", TimeUtil.millisecondsToHHMMSS(music.duration), true)
                     .addField("ET Until Playing",
@@ -121,8 +126,30 @@ public class MusicPlayerManager {
                     .addField("Position In Queue", String.valueOf(queue.size() - 1), true)
                     .setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
             if (author != null)
+                embed.setAuthor("Added to Queue!", BotContainer.getDotenv("HEROKU_SITE"),
+                        author.getEffectiveAvatarUrl());
+            return embed;
+        } else {
+            return Templates.music.playing_now.formatFull("**Playing** :notes: `" + music.title + "` - Now!");
+        }
+    }
+
+    public synchronized Object playSendYTSCMessage(OMusic music, @Nullable User author, @Nullable String hex,
+                                                   boolean bool, int queueSize, long ET) {
+        if (queue.size() > 1 && bool) {
+            EmbedBuilder embed = Templates.music.added_to_queue.clearEmbed()
+                    .setColor(Color.decode(BotContainer.getDotenv("YOUTUBE")))
+                    .setDescription(String.format("[%s](%s)", music.title, music.uri))
+                    .setThumbnail(music.thumbnail)
+                    .addField("Channel", music.author, true)
+                    .addField("Song Duration", TimeUtil.millisecondsToHHMMSS(music.duration), true)
+                    .addField("ET Until Playing",
+                            TimeUtil.millisecondsToHHMMSS(ET), true)
+                    .addField("Position In Queue", String.valueOf(queueSize), true)
+                    .setColor(Color.decode(hex != null ? hex : BotContainer.getDotenv("HEX")));
+            if (author != null)
                 embed.setAuthor("Added to Queue!",
-                        null, author.getEffectiveAvatarUrl());
+                        BotContainer.getDotenv("JAVKING_SITE"), author.getEffectiveAvatarUrl());
             return embed;
         } else {
             return Templates.music.playing_now.formatFull("**Playing** :notes: `" + music.title + "` - Now!");
@@ -291,30 +318,38 @@ public class MusicPlayerManager {
         if (queue.offer(music)) totTimeSeconds += music.duration;
     }
 
-//    public void addToTempQueue(OMusic music) {
+//    public synchronized void sortIndexQueue() {
+//        LinkedList<OMusic> currentQueue = getLinkedQueue();
+//        currentQueue.sort(Comparator.comparingInt(m -> m.index));
+//        replaceLinkedQueue(currentQueue);
+//    }
+//
+//    public synchronized void addToTempQueue(OMusic music) {
 //        tempQueue.add(music);
 //    }
 //
-//    public void sortTempQueue() {
-//        int interval = 0, limit = 8;
+//    public synchronized LinkedList<OMusic> sortIndexTempQueue() {
 //        LinkedList<OMusic> currentQueue = getLinkedQueue();
-//        List<OMusic> currentTempQueue = tempQueue;
-//        while (interval <= 8) {
-//            for (OMusic music : tempQueue) {
-//                if (music.index == interval) {
+//        LinkedList<OMusic> currentTempQueue = tempQueue;
+//        if (currentTempQueue.size() == 1) {
+//            currentQueue.offer(currentTempQueue.pop());
+//            return currentQueue;
+//        }
+//        List<OMusic> pastQueue = new ArrayList<>();
+//        int iterIndex = 0;
+//        while (!currentTempQueue.isEmpty()) {
+//            for (OMusic music : currentTempQueue) {
+//                if (iterIndex == music.index && !pastQueue.contains(music)) {
 //                    currentQueue.offer(music);
-//                    currentTempQueue.remove(music);
+//                    pastQueue.add(music);
 //                    totTimeSeconds += music.duration;
-//                    limit--;
-//                }
-//                if (limit == 0) {
-//                    interval++;
-//                    limit = 8;
 //                }
 //            }
+//            iterIndex++;
 //        }
-//        tempQueue = new ArrayList<>();
+//        tempQueue = new LinkedList<>();
 //        replaceLinkedQueue(currentQueue);
+//        return getLinkedQueue();
 //    }
 
     public synchronized void addSCToQueue(String[] args, User author, Message message) {

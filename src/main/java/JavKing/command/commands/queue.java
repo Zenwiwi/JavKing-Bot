@@ -52,11 +52,8 @@ public class queue extends AbstractCommand {
 
         int index = args.length == 0 ? 1 : Integer.parseInt(args[0]);
         int items = 10;
-        int start = (index - 1) * items;
-        int end = start + items + 1;
-
-        EmbedTemplate embedTemplate = new EmbedTemplate();
-        embedTemplate.clearEmbed();
+        int start = (index - 1) * items + 1;
+        int end = start + items;
 
         OMusic nP = queue.get(0);
 
@@ -68,25 +65,29 @@ public class queue extends AbstractCommand {
         String title = "[Queue for " + ((TextChannel) channel).getGuild().getName() + "](" + BotContainer.getDotenv("HEROKU_SITE") + ")" + repeat +
                 "\n\n__Now Playing__:\n" + nowPlaying;
 
+        EmbedTemplate embedTemplate = new EmbedTemplate();
+        embedTemplate.clearEmbed();
+
         long totalDuration = 0;
         for (OMusic oMusic : queue) totalDuration += oMusic.duration;
 
-        for (int i = start; i < end; i++) {
-            if (i > 0) {
+        if (queue.size() > 1) {
+            for (int i = start; i < end; i++) {
                 try {
-                    sb.append("`").append(i).append(".` [").append(queue.get(i).title).append("](").append(queue.get(i).uri)
-                            .append(") | `").append(TimeUtil.millisecondsToHHMMSS(queue.get(i).duration)).append(" Requested By: ")
+                    OMusic queueGet = queue.get(i);
+                    sb.append("`").append(i).append(".` [").append(queueGet.title).append("](").append(queueGet.uri)
+                            .append(") | `").append(TimeUtil.millisecondsToHHMMSS(queueGet.duration)).append(" Requested By: ")
                             .append(queue.get(i).requestedBy).append("`\n\n");
-                } catch (Exception e) {
+                } catch (IndexOutOfBoundsException e) {
                     break;
                 }
-                embedTemplate.setDescription(title + "\n__Queue__:\n" + sb + "\n**" + (queue.size() - 1) + " songs. Total Length: " + TimeUtil.millisecondsToHHMMSS(totalDuration) + "**");
-                int tabs = (int) Math.ceil((double) queue.size() / items);
-                embedTemplate.setFooter("Page " + index + " of " + tabs, author.getEffectiveAvatarUrl());
-            } else {
-                embedTemplate.setDescription(title);
             }
+            embedTemplate.setDescription(title + "\n__Queue__:\n" + sb + "\n**" + (queue.size() - 1) + " songs. Total Length: " + TimeUtil.millisecondsToHHMMSS(totalDuration) + "**");
+        } else {
+            embedTemplate.setDescription(title);
         }
+        int tabs = (int) Math.ceil((double) queue.size() / items);
+        embedTemplate.setFooter("Page " + index + " of " + tabs, author.getEffectiveAvatarUrl());
         Util.sendMessage(embedTemplate, inputMessage);
         return null;
     }

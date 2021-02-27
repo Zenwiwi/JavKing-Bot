@@ -1,6 +1,7 @@
 package JavKing.util.SP;
 
 import JavKing.command.model.OMusic;
+import JavKing.main.BotContainer;
 import JavKing.util.LPUtil;
 import com.google.common.collect.Lists;
 import com.wrapper.spotify.SpotifyApi;
@@ -18,11 +19,11 @@ import java.util.Objects;
 
 public class SPPLLoader {
 
-    private static final SpotifyApi spotifyApi = new SPUtil().getSpotifyApi();
+    private static final SpotifyApi spotifyApi = BotContainer.spUtil.getSpotifyApi();
 
     public static List<OMusic> getTrack(String id, User author, Message message) throws ParseException, SpotifyWebApiException, IOException {
         Track track = spotifyApi.getTrack(id).build().execute();
-        LPUtil.updateLPURI(id, SPUri.parseFromId(id, "playlist"), track.getName(), "https://open.scdn.co/cdn/images/favicon32.a19b4f5b.png",
+        LPUtil.updateLPURI(id, SPUri.parseFromId(id, "track"), track.getName(), "https://open.scdn.co/cdn/images/favicon32.a19b4f5b.png",
                 message.getGuild().getId());
         OMusic oMusic = new OMusic();
         oMusic.thumbnail = "https://open.scdn.co/cdn/images/favicon32.a19b4f5b.png";
@@ -35,6 +36,11 @@ public class SPPLLoader {
         return Lists.newArrayList(oMusic);
     }
 
+    private static String getTrackArtist(String id) throws ParseException, SpotifyWebApiException, IOException {
+        Track track = spotifyApi.getTrack(id).build().execute();
+        return track.getArtists()[0].getName();
+    }
+
     public static List<OMusic> getAlbumTrack(String id, User author, Message message) throws ParseException, SpotifyWebApiException, IOException {
         List<OMusic> oMusicList = Lists.newArrayList();
         int limit = 50;
@@ -43,7 +49,7 @@ public class SPPLLoader {
         Album album = spotifyApi.getAlbum(id).build().execute();
         String title = album.getName();
         String thumbnail = album.getImages()[0].getUrl();
-        LPUtil.updateLPURI(id, SPUri.parseFromId(id, "playlist"), title, thumbnail, message.getGuild().getId());
+        LPUtil.updateLPURI(id, SPUri.parseFromId(id, "album"), title, thumbnail, message.getGuild().getId());
 
         do {
             Paging<TrackSimplified> paging = spotifyApi.getAlbumsTracks(id).offset(offset).limit(limit).build().execute();
@@ -61,7 +67,7 @@ public class SPPLLoader {
                 oMusic.thumbnail = thumbnail;
                 oMusicList.add(oMusic);
             }
-            offset += limit;
+            offset = offset + limit;
             nextPage = paging.getNext();
         } while (nextPage != null);
         return oMusicList;
@@ -84,7 +90,7 @@ public class SPPLLoader {
                 IPlaylistItem track = item.getTrack();
                 OMusic oMusic = new OMusic();
                 oMusic.thumbnail = thumbnail;
-                oMusic.author = "[Artist](" + track.getHref() + ")";
+                oMusic.author = getTrackArtist(track.getId());
                 oMusic.duration = track.getDurationMs();
                 oMusic.id = track.getId();
                 oMusic.requestedBy = author.getName();
@@ -93,7 +99,7 @@ public class SPPLLoader {
                 oMusicList.add(oMusic);
             }
 //            tracks.addAll(Arrays.stream(items).map(PlaylistTrack::getTrack).filter(Objects::nonNull).collect(Collectors.toList()));
-            offset += limit;
+            offset = offset + limit;
             nextPage = paging.getNext();
         } while (nextPage != null);
         return oMusicList;

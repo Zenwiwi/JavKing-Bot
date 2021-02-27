@@ -12,7 +12,7 @@ public class OMusic extends AbstractModel {
     public String requestedBy = "";
     public String thumbnail = "";
     public String id = "";
-    public int index = 0;
+//    public int index = 0;
 
     @Override
     public String toString() {

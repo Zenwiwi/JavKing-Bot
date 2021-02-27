@@ -79,6 +79,7 @@ public class play extends AbstractCommand {
                 channel.sendMessage("<:spotify:811735540604862484> **Searching for **\uD83D\uDD0E " + Util.surround(Joiner.on(" ").join(args), "`")).queue();
                 try {
                     playerManager.addSPToQueue(args[0], author, inputMessage);
+                    return null;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return Templates.command.x_mark.formatFull("**Unable to load playlist/track(s)**");

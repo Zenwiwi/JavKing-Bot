@@ -74,7 +74,6 @@ public class Login {
         expire();
     }
 
-
     private class AutoRefreshTask implements Runnable {
         private final SpotifyApi spotifyApi;
 

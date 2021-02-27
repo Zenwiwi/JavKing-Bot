@@ -151,7 +151,7 @@ public class YTSearch {
                 return extractSearchResult(document, author, selected);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("YTSearch results timed out: YTSearch#loadSearchResult - " + selected.title);
         }
         return null;
     }

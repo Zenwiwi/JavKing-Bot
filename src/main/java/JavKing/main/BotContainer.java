@@ -42,7 +42,7 @@ public class BotContainer {
         spUtil = new SPUtil();
         spApiBuilder = new SpotifyApi.Builder()
                 .setClientId(getDotenv("SPOTIFY_ID_KEY"))
-                .setClientSecret(getDotenv("SPOTIFY_SERCRET_KEY"))
+                .setClientSecret(getDotenv("SPOTIFY_SECRET_KEY"))
                 .setRedirectUri(SpotifyHttpManager.makeUri(getDotenv("SPOTIFY_REDIRECT_KEY")));
         loginManager = new LoginManager();
         shards = new DiscordBot[numShards];
