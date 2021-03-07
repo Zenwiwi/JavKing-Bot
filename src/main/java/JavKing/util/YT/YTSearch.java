@@ -111,7 +111,6 @@ public class YTSearch {
     }
 
     public synchronized void resolvePlaylist(MusicPlayerManager musicPlayerManager, String uri, User author, Message message) {
-//        System.out.println(uri);
         String plId = YTUri.getPlaylistCode(uri);
         AudioPlaylist items = new YTPLSearch().playlist(plId, null);
         int index = 0;

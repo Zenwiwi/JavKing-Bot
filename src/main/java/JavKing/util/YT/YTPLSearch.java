@@ -24,7 +24,7 @@ public class YTPLSearch extends YoutubeAudioSourceManager {
     }
 
     public AudioPlaylist playlist(String playlistId, String selectedVideoId) {
-//        System.out.println("Starting to load playlist with ID " + playlistId);
+        System.out.println("Starting to load playlist with ID " + playlistId);
         try (HttpInterface httpInterface = getHttpInterface()) {
             return playlistLoader.load(httpInterface, playlistId, selectedVideoId,
                     YTPLSearch.this::buildTrackFromInfo);
