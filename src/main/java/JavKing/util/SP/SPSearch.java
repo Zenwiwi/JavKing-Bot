@@ -36,11 +36,11 @@ public class SPSearch {
             SPTask.Task.execute(0, author, message, oMusicList, playerManager, true);
             startSpotify(previousQueue, ET, author, message, playerManager);
         }
-
     }
 
     public static void startSpotify(int previousQueue, long ET, User author, Message message, MusicPlayerManager playerManager) {
         try {
+            while (playerManager.getLinkedQueue().isEmpty()) {}
             OMusic oMusic = playerManager.getLinkedQueue().get(previousQueue);
             Util.sendMessage(playerManager.playSendYTSCMessage(oMusic, author, BotContainer.getDotenv("SPOTIFY"),
                     previousQueue > 0, previousQueue, ET), message);

@@ -14,12 +14,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class SPUtil {
-    //    private static SPLogin spLogin;
     private final SpotifyApi spotifyApi;
     private final URI redirectUri = SpotifyHttpManager.makeUri("https://javking.com/spotify-redirect");
 
     public SPUtil() {
-//        spLogin = new SPLogin(new SpotifyApi.Builder());
         spotifyApi = new SpotifyApi.Builder()
                 .setClientId(BotContainer.getDotenv("SPOTIFY_ID_KEY"))
                 .setClientSecret(BotContainer.getDotenv("SPOTIFY_SECRET_KEY"))
@@ -39,7 +37,6 @@ public class SPUtil {
     }
 
     public SpotifyApi getSpotifyApi() {
-//        return spLogin.spotifyApi;
         return spotifyApi;
     }
 }

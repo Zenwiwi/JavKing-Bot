@@ -29,7 +29,6 @@ public class SCSearch {
     private static synchronized void searchSC(Message message, String uri, User author, @Nullable String thumbnail, MusicPlayerManager playerManager) {
         OMusic music = new OMusic();
         try {
-            System.out.println(uri);
             Thread.sleep(2000);
 
             playerManager.getDefaultAudioPlayerManager().loadItemOrdered(playerManager.getAudioPlayer(), uri, new AudioLoadResultHandler() {
@@ -78,7 +77,6 @@ public class SCSearch {
 
     private static synchronized void resolveSCVideoParameters(String id, User author, Message message, MusicPlayerManager playerManager) {
         OMusic music = BotContainer.mongoDbAdapter.loadMusic(id, author);
-        System.out.println(music);
         if (music == null) {
             String thumbnailURI;
             while (true) {
@@ -93,7 +91,6 @@ public class SCSearch {
             }
             searchSC(message, id, author, thumbnailURI, playerManager);
         } else {
-            System.out.println(music.title + "x");
             playerManager.addToQueue(music);
             playerManager.playCheckVoice(message, author);
         }

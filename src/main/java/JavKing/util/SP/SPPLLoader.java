@@ -1,7 +1,6 @@
 package JavKing.util.SP;
 
 import JavKing.command.model.OMusic;
-import JavKing.main.BotContainer;
 import JavKing.util.LPUtil;
 import com.google.common.collect.Lists;
 import com.wrapper.spotify.SpotifyApi;
@@ -19,7 +18,7 @@ import java.util.Objects;
 
 public class SPPLLoader {
 
-    private static final SpotifyApi spotifyApi = BotContainer.spUtil.getSpotifyApi();
+    private static final SpotifyApi spotifyApi = new SPUtil().getSpotifyApi();
 
     public static List<OMusic> getTrack(String id, User author, Message message) throws ParseException, SpotifyWebApiException, IOException {
         Track track = spotifyApi.getTrack(id).build().execute();

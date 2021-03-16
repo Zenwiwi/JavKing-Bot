@@ -3,14 +3,11 @@ package JavKing.main;
 import JavKing.db.MongoDbAdapter;
 import JavKing.handler.CommandHandler;
 import JavKing.util.SP.SPUtil;
-import JavKing.util.SP.login.LoginManager;
 import JavKing.util.YT.YTUtil;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.SpotifyHttpManager;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.exceptions.RateLimitedException;
 import org.apache.logging.log4j.LogManager;
@@ -25,8 +22,6 @@ public class BotContainer {
     public static MongoDbAdapter mongoDbAdapter = null;
     public static YTUtil ytUtil = null;
     public static SPUtil spUtil = null;
-    public static SpotifyApi.Builder spApiBuilder = null;
-    public static LoginManager loginManager;
     public static Dotenv dotenv = Dotenv.configure().ignoreIfMalformed().ignoreIfMissing().load();
     private final DiscordBot[] shards;
     private final int numShards;
@@ -40,11 +35,6 @@ public class BotContainer {
         mongoDbAdapter = new MongoDbAdapter();
         ytUtil = new YTUtil();
         spUtil = new SPUtil();
-        spApiBuilder = new SpotifyApi.Builder()
-                .setClientId(getDotenv("SPOTIFY_ID_KEY"))
-                .setClientSecret(getDotenv("SPOTIFY_SECRET_KEY"))
-                .setRedirectUri(SpotifyHttpManager.makeUri(getDotenv("SPOTIFY_REDIRECT_KEY")));
-        loginManager = new LoginManager();
         shards = new DiscordBot[numShards];
         lastActions = new AtomicLongArray(numShards);
         initHandlers();
